@@ -44,10 +44,8 @@ fn main() {
     //   in checking if a given movement option is possible.
     let mut stats: HashMap<_, _> = board_coords
         .iter()
-        .to_owned()
-        .zip(default_states.iter().to_owned())
+        .zip(default_states.iter())
         .collect();
-
 
     println!("{:#?}", stats); //debug
 
