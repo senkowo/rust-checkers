@@ -10,7 +10,7 @@ fn main() {
     );
     //* wait for key press...
 
-    //* Maybe put below into a function to configure/initialize the game.
+    //* Maybe put everything below in a separate function that sets up the game.
 
     // The following creates a list of coordinate names and puts them in a vector
     // e.g. 0_0, 3_2, 9_9; where "x-coords_y-coords".
