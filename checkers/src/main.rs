@@ -22,7 +22,7 @@ fn main() {
     }
     println!("{:#?}", board_coords); //debug
 
-    // The following creates the default board tile state ("emp" as in empty)
+    // The following creates the default board tile state ("emp" as in empty) (alts: "p1" and "p2")
     let mut default_states = Vec::new();
     for _ in 0..board_coords.len() {
         default_states.push(String::from("emp"));
