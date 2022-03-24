@@ -8,7 +8,7 @@ fn main() {
         "\n\n\tcli-checkers UwU\n
             \tPress any key to begin"
     );
-    //* wait for key press...
+    //* wait for key press... (yet to implement)
 
     //* Maybe put everything below in a separate function that sets up the game.
 
