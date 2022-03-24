@@ -1,5 +1,6 @@
 use std::collections::HashMap;
-use std::io;
+use std::io::{self, Write};
+//use std::io::Write;
 
 fn main() {
     clear();
@@ -17,6 +18,7 @@ fn main() {
     io::stdin().read_line(&mut uwu).expect("Failed to read line");
 
     //* Maybe I could put the vectors below in an impl! 
+
     
     // The following creates a list of coordinate names and puts them in a vector
     // e.g. 0_0, 3_2, 9_9; where "x-coords_y-coords".
@@ -39,12 +41,12 @@ fn main() {
     // The hash map stores the following: HashMap<"x_y coordinate", "tile occupancy">
     // This will later be used to keep track of the board and its pieces, as well as
     //   in checking if a given movement option is possible.
-    let mut stats: HashMap<_, _> = board_coords.iter().zip(default_states.iter()).collect();
+    let mut stats: HashMap<_, _> = board_coords.iter().to_owned().zip(default_states.iter().to_owned()).collect();
     println!("{:#?}", stats); //debug
 
 
     
-    print_board();
+    print_board(&stats);
 }
 
 fn stats_config() {
@@ -59,7 +61,7 @@ fn clear() {
     print!("\x1B[2J\x1B[1;1H"); // escape sequence for clearing terminal
 }
 
-fn print_board() {
+fn print_board(stats: &HashMap<&String,&String>) {
     println!(
         "\n
     ,______ ______ ______ ______ ______ ______ ______ ______ ______ ______,
@@ -97,4 +99,26 @@ fn print_board() {
 
     foo"
     );
+
+    // printing algorithm:
+    println!(",______ ______ ______ ______ ______ ______ ______ ______ ______ ______,");
+    
+    println!("|"); 
+
+    let mut val = "error";
+    for (k, v) in stats {
+        println!("{}", *k);
+        if *k == ("0_0") {
+            val = *v;
+            println!("break");
+            break; 
+        }
+    }
+    println!("{}", val);
+    
+    if val == "emp" {
+        println!("emp found!");
+        print!("      ");
+        let _ = io::stdout().flush();
+    }
 }
