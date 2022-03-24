@@ -33,6 +33,7 @@ fn main() {
 
     // The following creates the default board tile state ("emp" as in empty) (alts: "p1" and "p2")
     let mut default_states = Vec::new();
+    // maybe I could fill in p1 and p2 first, then fill all unfilled with emp...? 
     for _ in 0..board_coords.len() {
         default_states.push(String::from("emp"));
     }
@@ -128,10 +129,17 @@ fn print_board(stats: &HashMap<&String, &String>) {
                         break;
                     }
                 }
-
                 if val == "emp" {
                     print!("      |");
                     ioflush();
+                } else if val == "p1" {
+                    print!(" OOOO |");
+                    ioflush();
+                } else if val == "p2" {
+                    print!(" //// |");
+                    ioflush();
+                } else {
+                    println!("error");
                 }
             }
             println!("");
