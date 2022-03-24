@@ -94,7 +94,7 @@ fn print_board(stats: &HashMap<&String,&String>) {
     |------ ------ ------ ------ ------ ------ ------ ------ ------ ------|
     |      |      |      |      |      |      |      |      |      |      |
  0  |      |      |      |      |      |      |      |      |      |      |
-    '------ ------ ------ ------ ------ ------ ------ ------ ------ ------'
+    '---------------------------------------------------------------------'
         0      1      2      3      4      5      6      7      8      9
 
     foo"
@@ -102,23 +102,27 @@ fn print_board(stats: &HashMap<&String,&String>) {
 
     // printing algorithm:
     println!(",______ ______ ______ ______ ______ ______ ______ ______ ______ ______,");
-    
-    println!("|"); 
-
-    let mut val = "error";
-    for (k, v) in stats {
-        println!("{}", *k);
-        if *k == ("0_0") {
-            val = *v;
-            println!("break");
-            break; 
+    for y in 0..10 {
+        for x in 0..10 {
+            print!("|"); 
+            let _ = io::stdout().flush();
+            
+            let mut val = "error";
+            for (k, v) in stats {
+                if *k == &format!("{}_{}", x, y) {
+                    val = *v;
+                    break; 
+                }
+            }
+            
+            if val == "emp" {
+                print!("      ");
+                let _ = io::stdout().flush();
+            }
+            print!("|");
+            let _ = io::stdout().flush();
         }
+        println!("");
     }
-    println!("{}", val);
-    
-    if val == "emp" {
-        println!("emp found!");
-        print!("      ");
-        let _ = io::stdout().flush();
-    }
+
 }
