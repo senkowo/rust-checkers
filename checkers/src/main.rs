@@ -16,7 +16,7 @@ fn main() {
     let mut uwu = String::new();
     io::stdin().read_line(&mut uwu).expect("Failed to read line");
 
-    
+    //* Maybe I could put the vectors below in an impl! 
     
     // The following creates a list of coordinate names and puts them in a vector
     // e.g. 0_0, 3_2, 9_9; where "x-coords_y-coords".
