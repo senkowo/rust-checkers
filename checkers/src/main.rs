@@ -15,11 +15,12 @@ fn main() {
     );
     // waits for enter key
     let mut uwu = String::new();
-    io::stdin().read_line(&mut uwu).expect("Failed to read line");
+    io::stdin()
+        .read_line(&mut uwu)
+        .expect("Failed to read line");
 
-    //* Maybe I could put the vectors below in an impl! 
+    //* Maybe I could put the vectors below in an impl!
 
-    
     // The following creates a list of coordinate names and puts them in a vector
     // e.g. 0_0, 3_2, 9_9; where "x-coords_y-coords".
     let mut board_coords: Vec<String> = Vec::new();
@@ -41,11 +42,13 @@ fn main() {
     // The hash map stores the following: HashMap<"x_y coordinate", "tile occupancy">
     // This will later be used to keep track of the board and its pieces, as well as
     //   in checking if a given movement option is possible.
-    let mut stats: HashMap<_, _> = board_coords.iter().to_owned().zip(default_states.iter().to_owned()).collect();
+    let mut stats: HashMap<_, _> = board_coords
+        .iter()
+        .to_owned()
+        .zip(default_states.iter().to_owned())
+        .collect();
     println!("{:#?}", stats); //debug
 
-
-    
     print_board(&stats);
 }
 
@@ -65,7 +68,7 @@ fn ioflush() {
     let _ = io::stdout().flush();
 }
 
-fn print_board(stats: &HashMap<&String,&String>) {
+fn print_board(stats: &HashMap<&String, &String>) {
     println!(
         "\n
     ,______ ______ ______ ______ ______ ______ ______ ______ ______ ______,
@@ -104,21 +107,28 @@ fn print_board(stats: &HashMap<&String,&String>) {
     foo"
     );
 
-    // printing algorithm:
+    // spaghetti-code printing algorithm:
     println!("    ,______ ______ ______ ______ ______ ______ ______ ______ ______ ______,");
     for y in 0..10 {
-        for _ in 0..2 {
-            print!("    |");
+        for s in 0..2 {
+            print!(
+                "  {} |",
+                if s == 1 {
+                    (9 - y).to_string()
+                } else {
+                    String::from(" ")
+                }
+            );
             ioflush();
             for x in 0..10 {
                 let mut val = "error";
                 for (k, v) in stats {
                     if *k == &format!("{}_{}", x, y) {
                         val = *v;
-                        break; 
+                        break;
                     }
                 }
-                
+
                 if val == "emp" {
                     print!("      |");
                     ioflush();
@@ -126,7 +136,11 @@ fn print_board(stats: &HashMap<&String,&String>) {
             }
             println!("");
         }
+        if y == 9 {
+            continue;
+        };
         println!("    |------ ------ ------ ------ ------ ------ ------ ------ ------ ------|");
     }
-
+    println!("    '---------------------------------------------------------------------'");
+    println!("        0      1      2      3      4      5      6      7      8      9");
 }
