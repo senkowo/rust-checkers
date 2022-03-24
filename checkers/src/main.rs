@@ -61,6 +61,10 @@ fn clear() {
     print!("\x1B[2J\x1B[1;1H"); // escape sequence for clearing terminal
 }
 
+fn ioflush() {
+    let _ = io::stdout().flush();
+}
+
 fn print_board(stats: &HashMap<&String,&String>) {
     println!(
         "\n
@@ -101,28 +105,28 @@ fn print_board(stats: &HashMap<&String,&String>) {
     );
 
     // printing algorithm:
-    println!(",______ ______ ______ ______ ______ ______ ______ ______ ______ ______,");
+    println!("    ,______ ______ ______ ______ ______ ______ ______ ______ ______ ______,");
     for y in 0..10 {
-        for x in 0..10 {
-            print!("|"); 
-            let _ = io::stdout().flush();
-            
-            let mut val = "error";
-            for (k, v) in stats {
-                if *k == &format!("{}_{}", x, y) {
-                    val = *v;
-                    break; 
+        for _ in 0..2 {
+            print!("    |");
+            ioflush();
+            for x in 0..10 {
+                let mut val = "error";
+                for (k, v) in stats {
+                    if *k == &format!("{}_{}", x, y) {
+                        val = *v;
+                        break; 
+                    }
+                }
+                
+                if val == "emp" {
+                    print!("      |");
+                    ioflush();
                 }
             }
-            
-            if val == "emp" {
-                print!("      ");
-                let _ = io::stdout().flush();
-            }
-            print!("|");
-            let _ = io::stdout().flush();
+            println!("");
         }
-        println!("");
+        println!("    |------ ------ ------ ------ ------ ------ ------ ------ ------ ------|");
     }
 
 }
