@@ -1,17 +1,23 @@
 use std::collections::HashMap;
+use std::io;
 
 fn main() {
+    clear();
     println!("\n\nHewwo~");
     println!("Initiawizing... pls waitt :3");
-
+    sleep(2);
+    clear();
     println!(
-        "\n\n\tcli-checkers UwU\n
-            \tPress any key to begin"
+        "\n\n\tcli-checkers uwu\n\n\n\n\n
+            <insert ascii art here>\n\n\n\n\n
+            \tPress enter key to begin"
     );
-    //* wait for key press... (yet to implement)
+    // waits for enter key
+    let mut uwu = String::new();
+    io::stdin().read_line(&mut uwu).expect("Failed to read line");
 
-    //* Maybe put everything below in a separate function that sets up the game.
-
+    
+    
     // The following creates a list of coordinate names and puts them in a vector
     // e.g. 0_0, 3_2, 9_9; where "x-coords_y-coords".
     let mut board_coords: Vec<String> = Vec::new();
@@ -36,10 +42,22 @@ fn main() {
     let mut stats: HashMap<_, _> = board_coords.iter().zip(default_states.iter()).collect();
     println!("{:#?}", stats); //debug
 
+
+    
     print_board();
 }
 
-fn stats_config() {}
+fn stats_config() {
+    
+}
+
+fn sleep(s: u64) {
+    std::thread::sleep(std::time::Duration::from_secs(s));
+}
+
+fn clear() {
+    print!("\x1B[2J\x1B[1;1H"); // escape sequence for clearing terminal
+}
 
 fn print_board() {
     println!(
