@@ -1,5 +1,13 @@
-use std::collections::HashMap;
+
+// Documentation for MultiMaps:
+// https://docs.rs/multimap/0.8.3/multimap/
+
+extern crate multimap;
+
 use std::io::{self, Write};
+//use std::collections::HashMap;
+use multimap::MultiMap;
+
 
 fn main() {
     clear();
@@ -20,18 +28,19 @@ fn main() {
         .expect("Failed to read line");
 
 
-    // The following creates a Hash Map that stores the following: 
-    //         HashMap<'x_y coords', 'tile occupancy'>
+    // The following creates a MultiMap (similar to hashmap, but with more than 
+    // two values) that stores the following: 
+    //         HashMap<'x_y coords', Vec<'tile occupancy', 'piece type'>>
     // This will later be used to keep track of the board and its pieces, as well as
     // in checking if a given movement option is possible. 
     
-    let mut stats = HashMap::new();
+    let mut stats: MultiMap<String, Vec<String>> = MultiMap::new();
 
     for y in 0..10 {
         for x in 0..10 {
             stats.insert(
                 String::from( format!("{}_{}", x.to_string(), y.to_string()) ),
-                String::from("emp")
+                vec![String::from("emp"), String::from("single")],
             );
         }
     }
@@ -60,7 +69,7 @@ fn ioflush() {
     let _ = io::stdout().flush();
 }
 
-fn print_board(stats: &HashMap<String, String>) {
+fn print_board(stats: &MultiMap<String, Vec<String>>) {
     println!(
         "\n
     ,______ ______ ______ ______ ______ ______ ______ ______ ______ ______,
@@ -113,13 +122,15 @@ fn print_board(stats: &HashMap<String, String>) {
             );
             ioflush();
             for x in 0..10 {
-                let mut val = "error";
+                let mut val = String::new();
                 for (k, v) in stats {
                     if k == &format!("{}_{}", x, y) {
-                        val = v;
+                        val = v[0][0].clone();
+                        //println!("\nCurrent ret {:#?}\n", val);
                         break;
                     }
                 }
+                //println!("Outer ret {:#?}", val);
                 if val == "emp" {
                     print!("      |");
                     ioflush();
