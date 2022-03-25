@@ -1,9 +1,13 @@
 // Documentation for MultiMaps:
 // https://docs.rs/multimap/0.8.3/multimap/
+// Documentation for HashMaps:
+// https://doc.rust-lang.org/std/collections/struct.HashMap.html
 
 // https://users.rust-lang.org/t/can-we-make-vector-of-structs-if-yes-than-how-to-make-and-use-it/19476
 // I should've done this instead, maybe?
 // Maybe fork it and try it again using structs later. + impl.
+// Maybe I could change the vector of strings into a vector of
+// structs.
 
 extern crate multimap;
 
@@ -42,10 +46,10 @@ fn main() {
             stats.insert(
                 String::from(format!("{}_{}", x.to_string(), y.to_string())),
                 vec![
-                    // init_pieces_location initializes the location of player
+                    // init_pieces_status initializes the location of player
                     // 1's and player 2's pieces, respectively. The code is
                     // spaghetti, so I thought I should put it in a separate fn.
-                    String::from(init_pieces_location(x, y)),
+                    String::from(init_pieces_status(x, y)),
                     String::from("single"),
                 ],
             );
@@ -55,9 +59,24 @@ fn main() {
     println!("{:#?}", stats); //debug
 
     print_board(&stats);
+
+
+    let mut input: String = user_input();
+    for i in ..3 {
+        match &stats.get(&input[..]) {
+            Some(occupancy) => println!("occupancy: {}", occupancy[0]),
+            None => println!("error, {:#?}", &input)
+        }
+    }
+
+    //println!("{}", stats[format!("{}_{}", )][0])
+
+    //now change value?
+
+    
 }
 
-fn init_pieces_location(x: u8, y: u8) -> String {
+fn init_pieces_status(x: u8, y: u8) -> String {
     String::from(if ((x + (y % 2)) % 2) == 1 {
         match y {
             0..=2 => "p1",
@@ -73,9 +92,18 @@ fn init_pieces_location(x: u8, y: u8) -> String {
     })
 }
 
-fn logic() {}
+fn logic() {
+        
+}
 
-fn user_input() {}
+fn user_input() -> String {
+    let mut ret = String::new();
+    io::stdin()
+        .read_line(&mut ret)
+        .expect("Failed to read line");
+    ret.pop();
+    ret
+}
 
 fn sleep(s: u64) {
     std::thread::sleep(std::time::Duration::from_secs(s));
