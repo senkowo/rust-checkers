@@ -73,18 +73,25 @@ fn main() {
 
         if i == 0 {
             let byte_list = input.as_bytes();
-            let byte_possible_nums = vec![b'1', b'2', b'3', b'4', b'5', b'6', b'7', b'8', b'9'];
-            let new_string = String::new();
+            let byte_possible_nums = vec![b'0', b'1', b'2', b'3', b'4', b'5', b'6', b'7', b'8', b'9'];
+            let mut new_string = String::new();
 
             for (i, &byte_ch) in byte_list.iter().enumerate() {
                 if byte_possible_nums.contains(&byte_ch) {
-                    .push_str()
+                    match std::str::from_utf8(&byte_list) {
+                        Ok(ch) => {
+                            &new_string.push_str(ch);
+                            println!("new ch {}", ch);
+                        },
+                        Err(e) => panic!("Invalid UTF-8 sequence: {}", e),
+                    };
                 }
-                if i == 1 {
-                    new_byte.insert(b" ");
-                }
+                //if i == 1 {
+                //    new_byte.insert(b" ");
+                //}
                 
             }
+            println!("second test {:#?}", new_string);
         }
     
     }
