@@ -1,6 +1,10 @@
 // Documentation for MultiMaps:
 // https://docs.rs/multimap/0.8.3/multimap/
 
+// https://users.rust-lang.org/t/can-we-make-vector-of-structs-if-yes-than-how-to-make-and-use-it/19476
+// I should've done this instead, maybe?
+// Maybe fork it and try it again using structs later. + impl.
+
 extern crate multimap;
 
 use multimap::MultiMap;
@@ -9,12 +13,12 @@ use std::io::{self, Write};
 
 fn main() {
     clear();
-    println!("\n\nHewwo~");
-    println!("Initiawizing... pls waitt :3");
+    println!("\n\nHewwo");
+    println!("Initializing... pls wait");
     sleep(2);
     clear();
     println!(
-        "\n\n\tcli-checkers uwu\n\n\n\n\n
+        "\n\n\tcli-checkers OwO\n\n\n\n\n
             <insert ascii art here>\n\n\n\n\n
             \tPress enter key to begin"
     );
@@ -54,21 +58,18 @@ fn main() {
 }
 
 fn init_pieces_location(x: u8, y: u8) -> String {
-    String::from(if (y > 2) && (y < 7) {
-        "emp"
-    } else {
-        if ((x + (y % 2)) % 2) == 1 {
-            match y {
-                0..=2 => "p1",
-                7..=9 => "p2",
-                _ => {
-                    println!("error");
-                    "emp"
-                }
+    String::from(if ((x + (y % 2)) % 2) == 1 {
+        match y {
+            0..=2 => "p1",
+            3..=6 => "emp",
+            7..=9 => "p2",
+            _ => {
+                println!("error");
+                "emp"
             }
-        } else {
-            "emp"
         }
+    } else {
+        "emp"
     })
 }
 
