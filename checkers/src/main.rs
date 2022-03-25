@@ -62,11 +62,31 @@ fn main() {
 
 
     let mut input: String = user_input();
-    for i in ..3 {
+    for i in 0..3 {
         match &stats.get(&input[..]) {
-            Some(occupancy) => println!("occupancy: {}", occupancy[0]),
+            Some(occupancy) => {
+                println!("occupancy: {}", occupancy[0]);
+                break;
+            },
             None => println!("error, {:#?}", &input)
         }
+
+        if i == 0 {
+            let byte_list = input.as_bytes();
+            let byte_possible_nums = vec![b'1', b'2', b'3', b'4', b'5', b'6', b'7', b'8', b'9'];
+            let new_string = String::new();
+
+            for (i, &byte_ch) in byte_list.iter().enumerate() {
+                if byte_possible_nums.contains(&byte_ch) {
+                    .push_str()
+                }
+                if i == 1 {
+                    new_byte.insert(b" ");
+                }
+                
+            }
+        }
+    
     }
 
     //println!("{}", stats[format!("{}_{}", )][0])
