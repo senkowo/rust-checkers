@@ -1,13 +1,11 @@
-
 // Documentation for MultiMaps:
 // https://docs.rs/multimap/0.8.3/multimap/
 
 extern crate multimap;
 
-use std::io::{self, Write};
-//use std::collections::HashMap;
 use multimap::MultiMap;
-
+use std::collections::HashMap;
+use std::io::{self, Write};
 
 fn main() {
     clear();
@@ -20,42 +18,63 @@ fn main() {
             <insert ascii art here>\n\n\n\n\n
             \tPress enter key to begin"
     );
-    
+
     // waits for enter key
     let mut uwu = String::new();
     io::stdin()
         .read_line(&mut uwu)
         .expect("Failed to read line");
 
+    // The following creates a MultiMap (similar to hashmap but with more than
+    // two values) that stores the following:
+    //         MultiMap<'x_y coords', Vec<'tile occupancy', 'piece type'>>
+    // This will later be used to keep track of the board and its pieces, as well
+    // as in checking if a given movement option is available.
 
-    // The following creates a MultiMap (similar to hashmap, but with more than 
-    // two values) that stores the following: 
-    //         HashMap<'x_y coords', Vec<'tile occupancy', 'piece type'>>
-    // This will later be used to keep track of the board and its pieces, as well as
-    // in checking if a given movement option is possible. 
-    
     let mut stats: MultiMap<String, Vec<String>> = MultiMap::new();
 
     for y in 0..10 {
         for x in 0..10 {
             stats.insert(
-                String::from( format!("{}_{}", x.to_string(), y.to_string()) ),
-                vec![String::from("emp"), String::from("single")],
+                String::from(format!("{}_{}", x.to_string(), y.to_string())),
+                vec![
+                    // init_pieces_location initializes the location of player
+                    // 1's and player 2's pieces, respectively. The code is
+                    // spaghetti, so I thought I should put it in a separate fn.
+                    String::from(init_pieces_location(x, y)),
+                    String::from("single"),
+                ],
             );
         }
     }
-    // modified config; add before adding emp?
 
-    println!("{:#?}", stats);
-
-    
+    println!("{:#?}", stats); //debug
 
     print_board(&stats);
 }
 
-fn stats_config() {
-    
+fn init_pieces_location(x: u8, y: u8) -> String {
+    String::from(if (y > 2) && (y < 7) {
+        "emp"
+    } else {
+        if ((x + (y % 2)) % 2) == 1 {
+            match y {
+                0..=2 => "p1",
+                7..=9 => "p2",
+                _ => {
+                    println!("error");
+                    "emp"
+                }
+            }
+        } else {
+            "emp"
+        }
+    })
 }
+
+fn logic() {}
+
+fn user_input() {}
 
 fn sleep(s: u64) {
     std::thread::sleep(std::time::Duration::from_secs(s));
@@ -72,6 +91,7 @@ fn ioflush() {
 fn print_board(stats: &MultiMap<String, Vec<String>>) {
     println!(
         "\n
+    for reference:
     ,______ ______ ______ ______ ______ ______ ______ ______ ______ ______,
     |      |      |      |      |      |      |      |      |      |      |
  9  |      |      |      |      |      |      |      |      |      |      |
@@ -104,11 +124,11 @@ fn print_board(stats: &MultiMap<String, Vec<String>>) {
  0  |      |      |      |      |      |      |      |      |      |      |
     '---------------------------------------------------------------------'
         0      1      2      3      4      5      6      7      8      9
-
-    for reference"
+    
+    "
     );
 
-    // spaghetti-code printing algorithm:
+    // spaghetti-code UI printing algorithm:
     println!("    ,______ ______ ______ ______ ______ ______ ______ ______ ______ ______,");
     for y in (0..10).rev() {
         for s in 0..2 {
