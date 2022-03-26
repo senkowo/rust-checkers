@@ -28,9 +28,9 @@ fn main() {
     // Hashmap "stats" stores a key of tuple (u8, u8), which represents
     // the x and y coordinates of a given tile on the checkerboard.
     // For the value of each respective key, there is an instance of
-    // struct called "Tile", which stores the tile state (e.g. occupied
-    // by Player 1, Player 2, or empty) and the type of piece on that
-    // tile (e.g. single, double, or NA).
+    // struct "Tile", which stores the tile state (e.g. occupied by
+    // Player 1, Player 2, or empty) and the type of piece on that tile
+    // (e.g. single, double, or NA).
     let mut stats: HashMap<(u8, u8), Tile> = HashMap::new();
 
     for y in 0..10 {
@@ -147,7 +147,8 @@ fn print_board(stats: &HashMap<(u8, u8), Tile>) {
             ioflush();
             for x in 0..10 {
                 for (k, v) in stats {
-                    if k == &(x, y) {
+                    // "*k" or "&(x, y)"???
+                    if *k == (x, y) {
                         match v.state {
                             Occupancy::Emp => {
                                 print!("      |");
@@ -161,9 +162,6 @@ fn print_board(stats: &HashMap<(u8, u8), Tile>) {
                                 print!(" //// |");
                                 ioflush();
                             },
-                            _ => {
-                                println!("error");
-                            }
                         }
                     }
                 }
