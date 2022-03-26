@@ -35,24 +35,15 @@ fn main() {
 
     for y in 0..10 {
         for x in 0..10 {
-            stats.insert(
-                (x, y),
-                Tile {
-                    state: Occupancy::Emp,
-                    level: Level::NA,
-                },
-            );
+            stats.insert((x, y), initialize_pieces(x, y));
         }
     }
 
-    initialize_pieces(&mut stats);
-
-    for (key, value) in &stats {
-        println!("Key: {:?}\tValue: {:?}", key, value);
-    }
+    //for (key, value) in &stats {
+    //    println!("Key: {:?}\tValue: {:?}", key, value);
+    //}
 
     print_board(&stats);
-
 }
 
 fn introduction() {
@@ -60,11 +51,12 @@ fn introduction() {
     println!("\n\n<Insert Introduction/Spash Screen>");
     sleep(2);
     clear();
-    println!("{}{}{}{}",
-             "\n\n\tcli-checkers\n\n\n",
-             "\tType \"h\" for how to play the game\n\n\n",
-             "\t<insert ascii art here>\n\n\n\n",
-             "\tPress enter key to begin"
+    println!(
+        "{}{}{}{}",
+        "\n\n\tcli-checkers\n\n\n",
+        "\tType \"h\" for how to play the game\n\n\n",
+        "\t<insert ascii art here>\n\n\n\n",
+        "\tPress enter key to begin"
     );
     loop {
         print!("\n\n\n\n\nCommand: ");
@@ -79,57 +71,49 @@ fn introduction() {
 fn intro_help(input: &str) {
     clear();
     match input {
-        "h" => println!("{}{}{}{}",
-                        "\n\n\tWelcome to cli-checkers!\n\n",
-                        "\tThis is a two player game where both players",
-                        " take turns making a move.\n",
-                        "\tThere are several ways to perform a move:"
+        "h" => println!(
+            "{}{}{}{}",
+            "\n\n\tWelcome to cli-checkers!\n\n",
+            "\tThis is a two player game where both players",
+            " take turns making a move.\n",
+            "\tThere are several ways to perform a move:"
         ),
         _ => println!("error"),
     }
 }
 
-fn initialize_pieces(stats: &mut HashMap<(u8,u8),Tile>) {
-    for y in 0..10 {
-        for x in 0..10 {
-            if ((x + (y % 2)) % 2) == 1 {
-                match y {
-                    0..=2 => &stats.insert(
-                        (x, y),
-                        Tile {
-                            state: Occupancy::P1,
-                            level: Level::Single,
-                        }
-                    ),
-                    3..=6 => &stats.insert(
-                        (x, y),
-                        Tile {
-                            state: Occupancy::Emp,
-                            level: Level::NA,
-                        }
-                    ),
-                    7..=9 => &stats.insert(
-                        (x, y),
-                        Tile {
-                            state: Occupancy::P2,
-                            level: Level::Single,
-                        }
-                    ),
-                    _ => {
-                        println!("error!!!!");
-                        &stats.insert(
-                            (x, y),
-                            Tile {
-                                state: Occupancy::Emp,
-                                level: Level::NA,
-                            }
-                        )
-                    },
-                };
+fn initialize_pieces(x: u8, y: u8) -> Tile {
+    if ((x + (y % 2)) % 2) == 1 {
+        match y {
+            0..=2 => Tile {
+                state: Occupancy::P1,
+                level: Level::Single,
+            },
+            3..=6 => Tile {
+                state: Occupancy::Emp,
+                level: Level::NA,
+            },
+            7..=9 => Tile {
+                state: Occupancy::P2,
+                level: Level::Single,
+            },
+            _ => {
+                println!("error!!!");
+                Tile {
+                    state: Occupancy::Emp,
+                    level: Level::NA,
+                }
             }
+        }
+    } else {
+        Tile {
+            state: Occupancy::Emp,
+            level: Level::NA,
         }
     }
 }
+
+
 
 fn print_board(stats: &HashMap<(u8, u8), Tile>) {
     // spaghetti-code UI printing algorithm:
@@ -153,15 +137,15 @@ fn print_board(stats: &HashMap<(u8, u8), Tile>) {
                             Occupancy::Emp => {
                                 print!("      |");
                                 ioflush();
-                            },
+                            }
                             Occupancy::P1 => {
                                 print!(" 0000 |");
                                 ioflush();
-                            },
+                            }
                             Occupancy::P2 => {
                                 print!(" //// |");
                                 ioflush();
-                            },
+                            }
                         }
                     }
                 }
