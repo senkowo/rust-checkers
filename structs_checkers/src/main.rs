@@ -33,6 +33,8 @@ fn main() {
     // (e.g. single, double, or NA).
     let mut stats: HashMap<(u8, u8), Tile> = HashMap::new();
 
+    // essentially puts all the pieces in the right place by filling in
+    // the keys and values of "stats" appropriately.
     for y in 0..10 {
         for x in 0..10 {
             stats.insert((x, y), initialize_pieces(x, y));
@@ -44,12 +46,23 @@ fn main() {
     //}
 
     print_board(&stats);
+
+    let mut full_move_action = Vec::new();
+
+    let first_ret = input_first_coord();
+    for v in first_ret.iter() {
+        full_move_action.push(v)
+    }
+    println!("full_move action before second: {:#?}", full_move_action);
+
+
+    input_second_coord();
 }
 
 fn introduction() {
     clear();
     println!("\n\n<Insert Introduction/Spash Screen>");
-    sleep(2);
+    sleep(1);
     clear();
     println!(
         "{}{}{}{}",
@@ -111,6 +124,37 @@ fn initialize_pieces(x: u8, y: u8) -> Tile {
             level: Level::NA,
         }
     }
+}
+
+fn input_first_coord() -> Vec<char> {
+    loop {
+        print!("Input move argument (e.g. \"3 2\", \"32\", \"32 54\", \"3254\"): ");
+        ioflush();
+        let input = user_input();
+
+        let mut input_as_chars: Vec<char> = input.chars().collect();
+        let number_chars: Vec<char> = vec!['1', '2', '3', '4', '5', '6', '7', '8', '9'];
+        let mut chars_to_remove_from_number_chars: Vec<usize> = Vec::new();
+        for (i, c) in input_as_chars.iter_mut().enumerate() {
+            if !number_chars.contains(c) {
+                chars_to_remove_from_number_chars.push(i);
+            }
+        }
+        println!("chars_to_remove_from_number_chars: {:#?}", chars_to_remove_from_number_chars);
+        for i in chars_to_remove_from_number_chars {
+            input_as_chars.remove(i);
+            println!("i value: {:#?}", i);
+        }
+
+        println!("input_as_chars: {:#?}", input_as_chars);
+
+        if (input_as_chars.len() == 2) || (input_as_chars.len() == 4) {
+            return input_as_chars;
+        }
+    }
+}
+fn input_second_coord() {
+
 }
 
 
