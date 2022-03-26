@@ -33,8 +33,8 @@ fn main() {
     // tile (e.g. single, double, or NA).
     let mut stats: HashMap<(u8, u8), Tile> = HashMap::new();
 
-    for x in 0..10 {
-        for y in 0..10 {
+    for y in 0..10 {
+        for x in 0..10 {
             stats.insert(
                 (x, y),
                 Tile {
@@ -45,9 +45,14 @@ fn main() {
         }
     }
 
-    for (key, value) in stats.into_iter() {
+    initialize_pieces(&mut stats);
+
+    for (key, value) in &stats {
         println!("Key: {:?}\tValue: {:?}", key, value);
     }
+
+    print_board(&stats);
+
 }
 
 fn introduction() {
@@ -55,13 +60,15 @@ fn introduction() {
     println!("\n\n<Insert Introduction/Spash Screen>");
     sleep(2);
     clear();
-    println!("{}{}{}",
-             "\n\n\tcli-checkers\n\n",
-             "\tType \"h\" for how to play the game\n\n",
+    println!("{}{}{}{}",
+             "\n\n\tcli-checkers\n\n\n",
+             "\tType \"h\" for how to play the game\n\n\n",
              "\t<insert ascii art here>\n\n\n\n",
              "\tPress enter key to begin"
     );
     loop {
+        print!("\n\n\n\n\nCommand: ");
+        ioflush();
         let uwu = user_input();
         match &uwu[..] {
             "h" => intro_help(&uwu),
@@ -80,6 +87,97 @@ fn intro_help(input: &str) {
         ),
         _ => println!("error"),
     }
+}
+
+fn initialize_pieces(stats: &mut HashMap<(u8,u8),Tile>) {
+    for y in 0..10 {
+        for x in 0..10 {
+            if ((x + (y % 2)) % 2) == 1 {
+                match y {
+                    0..=2 => &stats.insert(
+                        (x, y),
+                        Tile {
+                            state: Occupancy::P1,
+                            level: Level::Single,
+                        }
+                    ),
+                    3..=6 => &stats.insert(
+                        (x, y),
+                        Tile {
+                            state: Occupancy::Emp,
+                            level: Level::NA,
+                        }
+                    ),
+                    7..=9 => &stats.insert(
+                        (x, y),
+                        Tile {
+                            state: Occupancy::P2,
+                            level: Level::Single,
+                        }
+                    ),
+                    _ => {
+                        println!("error!!!!");
+                        &stats.insert(
+                            (x, y),
+                            Tile {
+                                state: Occupancy::Emp,
+                                level: Level::NA,
+                            }
+                        )
+                    },
+                };
+            }
+        }
+    }
+}
+
+fn print_board(stats: &HashMap<(u8, u8), Tile>) {
+    // spaghetti-code UI printing algorithm:
+    println!("    ,______ ______ ______ ______ ______ ______ ______ ______ ______ ______,");
+    for y in (0..10).rev() {
+        for s in 0..2 {
+            print!(
+                "  {} |",
+                if s == 1 {
+                    y.to_string()
+                } else {
+                    String::from(" ")
+                }
+            );
+            ioflush();
+            for x in 0..10 {
+                for (k, v) in stats {
+                    if k == &(x, y) {
+                        match v.state {
+                            Occupancy::Emp => {
+                                print!("      |");
+                                ioflush();
+                            },
+                            Occupancy::P1 => {
+                                print!(" 0000 |");
+                                ioflush();
+                            },
+                            Occupancy::P2 => {
+                                print!(" //// |");
+                                ioflush();
+                            },
+                            _ => {
+                                println!("error");
+                            }
+                        }
+                    }
+                }
+            }
+            // only here to create newline
+            println!("");
+        }
+        if y == 0 {
+            continue;
+        };
+        println!("    |------ ------ ------ ------ ------ ------ ------ ------ ------ ------|");
+    }
+    println!("    '---------------------------------------------------------------------'");
+    println!("        0      1      2      3      4      5      6      7      8      9");
 }
 
 fn sleep(s: u64) {
