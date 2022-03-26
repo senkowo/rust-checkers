@@ -22,7 +22,7 @@ fn main() {
     sleep(2);
     clear();
     println!(
-        "\n\n\tcli-checkers OwO\n\n\n\n\n
+        "\n\n\tcli-checkers uwu\n\n\n\n\n
             <insert ascii art here>\n\n\n\n\n
             \tPress enter key to begin"
     );
