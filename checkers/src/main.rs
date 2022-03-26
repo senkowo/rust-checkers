@@ -12,10 +12,11 @@
 extern crate multimap;
 
 use multimap::MultiMap;
-use std::collections::HashMap;
+//use std::collections::HashMap;
 use std::io::{self, Write};
 
 fn main() {
+    // Introduction:
     clear();
     println!("\n\nHewwo");
     println!("Initializing... pls wait");
@@ -28,10 +29,8 @@ fn main() {
     );
 
     // waits for enter key
-    let mut uwu = String::new();
-    io::stdin()
-        .read_line(&mut uwu)
-        .expect("Failed to read line");
+    let mut _uwu = String::new();
+    _uwu = user_input();
 
     // The following creates a MultiMap (similar to hashmap but with more than
     // two values) that stores the following:
@@ -46,9 +45,9 @@ fn main() {
             stats.insert(
                 String::from(format!("{}_{}", x.to_string(), y.to_string())),
                 vec![
-                    // init_pieces_status initializes the location of player
-                    // 1's and player 2's pieces, respectively. The code is
-                    // spaghetti, so I thought I should put it in a separate fn.
+                    // init_pieces_status() initializes player 1's and player 2's
+                    // pieces. The code is spaghetti, so I thought I should put
+                    // it in a separate function.
                     String::from(init_pieces_status(x, y)),
                     String::from("single"),
                 ],
@@ -56,51 +55,27 @@ fn main() {
         }
     }
 
-    println!("{:#?}", stats); //debug
+    //println!("{:#?}", stats); //debug
 
     print_board(&stats);
 
+    // user input for coordinates
 
-    let mut input: String = user_input();
-    for i in 0..3 {
-        match &stats.get(&input[..]) {
+    let input: String = user_input();
+    let mut input_mod = String::new();
+
+    for i in 0..2 {
+
+        input_mod = input_alternate_input_syntax_check(&input, i);
+
+        match &stats.get(&input_mod[..]) {
             Some(occupancy) => {
                 println!("occupancy: {}", occupancy[0]);
                 break;
-            },
-            None => println!("error, {:#?}", &input)
-        }
-
-        if i == 0 {
-            let byte_list = input.as_bytes();
-            let byte_possible_nums = vec![b'0', b'1', b'2', b'3', b'4', b'5', b'6', b'7', b'8', b'9'];
-            let mut new_string = String::new();
-
-            for (i, &byte_ch) in byte_list.iter().enumerate() {
-                if byte_possible_nums.contains(&byte_ch) {
-                    match std::str::from_utf8(&byte_list) {
-                        Ok(ch) => {
-                            &new_string.push_str(ch);
-                            println!("new ch {}", ch);
-                        },
-                        Err(e) => panic!("Invalid UTF-8 sequence: {}", e),
-                    };
-                }
-                //if i == 1 {
-                //    new_byte.insert(b" ");
-                //}
-                
             }
-            println!("second test {:#?}", new_string);
+            None => println!("error, {:#?}", &input),
         }
-    
     }
-
-    //println!("{}", stats[format!("{}_{}", )][0])
-
-    //now change value?
-
-    
 }
 
 fn init_pieces_status(x: u8, y: u8) -> String {
@@ -119,9 +94,43 @@ fn init_pieces_status(x: u8, y: u8) -> String {
     })
 }
 
-fn logic() {
-        
+fn input_alternate_input_syntax_check(input: &String, i: u8) -> String {
+    // or instead, I could make it so there is a vector array of bites 0-9,
+    // and if one letter matches, add that letter to another vector array/
+    // or add it to a string, and then return that. So both initial and end
+    // coordinates are received and put in all together at once?
+    // maybe I could have both available: if single coordinate, prompt for
+    // another... or maybe return tuple from this function... or maybe after
+    // returning "x_y x_y", separate the two and return with the separated
+    // half, and push that into the next prompt.
+
+
+    match i {
+        0 => {
+            // syntax for "x_y" or "x y" or "x-y"
+            let char_vec: Vec<char> = input.chars().collect();
+            if char_vec.len() == 3 {
+                format!("{}_{}", char_vec[0], char_vec[2] ).to_string()
+            } else {
+                input.clone()
+            }
+        },
+        1 => {
+            // syntax for "xy"
+            let char_vec: Vec<char> = input.chars().collect();
+            if char_vec.len() == 2 {
+                format!("{}_{}", char_vec[0], char_vec[1] ).to_string()
+            } else {
+                input.clone()
+            }
+        },
+        _ => {
+            input.clone()
+        },
+    }
 }
+
+fn logic() {}
 
 fn user_input() -> String {
     let mut ret = String::new();
