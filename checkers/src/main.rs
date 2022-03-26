@@ -97,12 +97,16 @@ fn init_pieces_status(x: u8, y: u8) -> String {
 fn input_alternate_input_syntax_check(input: &String, i: u8) -> String {
     // or instead, I could make it so there is a vector array of bites 0-9,
     // and if one letter matches, add that letter to another vector array/
-    // or add it to a string, and then return that. So both initial and end
-    // coordinates are received and put in all together at once?
-    // maybe I could have both available: if single coordinate, prompt for
-    // another... or maybe return tuple from this function... or maybe after
-    // returning "x_y x_y", separate the two and return with the separated
-    // half, and push that into the next prompt.
+    // or add it to a string, and then return that (might want here too?).
+    // So both initial and end coordinates are received and put in all
+    // together at once? maybe I could have both available: if single
+    // coordinate, prompt for another... or maybe return tuple from this
+    // function... or maybe after returning "x_y x_y", separate the two
+    // and return with the separated half, and push that into the next
+    // prompt.
+    // If I use structs, that would eliminate the need to create a String
+    // to represent coordinates, and instead have "x: u8, y: u8" or a
+    // tuple. Multiple types too, in contract to Vec's one type.
 
 
     match i {
