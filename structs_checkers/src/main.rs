@@ -1,8 +1,6 @@
-
 // for deleting items/taking ownership from hashmap:
 // https://stackoverflow.com/questions/43416196/return-exact-value-in-rust-hashmap
 //
-
 
 use std::collections::HashMap;
 use std::convert::TryInto;
@@ -38,13 +36,13 @@ enum PlayerTurn {
 fn main() {
     introduction();
 
-    // Hashmap "stats" stores a key of tuple (u8, u8), which represents
+    // Hashmap "stats" stores a key of tuple (i8, i8), which represents
     // the x and y coordinates of a given tile on the checkerboard.
     // For the value of each respective key, there is an instance of
     // struct "Tile", which stores the tile state (e.g. occupied by
     // Player 1, Player 2, or empty) and the type of piece on that tile
     // (e.g. single, double, or NA).
-    let mut stats: HashMap<(u8, u8), Tile> = HashMap::new();
+    let mut stats: HashMap<(i8, i8), Tile> = HashMap::new();
 
     // essentially puts all the pieces in the right place by filling in
     // the keys and values of "stats" appropriately.
@@ -73,8 +71,17 @@ fn main() {
 
         // logic: check if first coord belongs to P1, then if the
         // destination is a valid movement (also consider double).
-        let valid: bool = logic_check(&whos_turn, &full_move_argument, &stats);
+        let valid = logic_check(&whos_turn, &full_move_argument, &stats);
         println!("logic_check: {:?}", valid);
+
+        if !valid {
+            println!("invalid input, please try again.");
+            continue;
+        }
+
+        logic_move(&whos_turn, &full_move_argument, &mut stats);
+
+
 
         if matches![whos_turn, PlayerTurn::P1] {
             whos_turn = PlayerTurn::P2;
@@ -120,7 +127,7 @@ fn intro_help(input: &str) {
     }
 }
 
-fn initialize_pieces(x: u8, y: u8) -> Tile {
+fn initialize_pieces(x: i8, y: i8) -> Tile {
     if ((x + (y % 2)) % 2) == 1 {
         match y {
             0..=2 => Tile {
@@ -144,7 +151,7 @@ fn initialize_pieces(x: u8, y: u8) -> Tile {
     }
 }
 
-fn input_full_coords() -> ((u8, u8), (u8, u8)) {
+fn input_full_coords() -> ((i8, i8), (i8, i8)) {
     let mut full_move_action: Vec<char> = Vec::new();
 
     let first_output_of_chars = input_single_coords(1);
@@ -241,12 +248,16 @@ fn input_single_coords(first_or_second: u8) -> Vec<char> {
     }
 }
 
-fn logic_check(whos_turn: &PlayerTurn, double_coodinates: &((u8, u8), (u8, u8)), stats: &HashMap<(u8, u8), Tile>) -> bool {
+fn logic_check(
+    whos_turn: &PlayerTurn,
+    double_coodinates: &((i8, i8), (i8, i8)),
+    stats: &HashMap<(i8, i8), Tile>,
+) -> bool {
     let ((a, b), (c, d)) = double_coodinates;
     println!("stats status: {:?}", stats.get(&(*a, *b)).unwrap().state);
 
-    // checks if first coord is the current player's piece and if
-    // second coord is empty.
+    // checks if the first coordinate is the current player's piece
+    // and if the second coordinate is empty.
     match whos_turn {
         &PlayerTurn::P1 => {
             if matches![stats.get(&(*a, *b)).unwrap().state, Occupancy::P1] {
@@ -271,17 +282,97 @@ fn logic_check(whos_turn: &PlayerTurn, double_coodinates: &((u8, u8), (u8, u8)),
             } else {
                 return false;
             }
-
         }
     }
 
-    // now check for movement logic based on coordinate movement and
-    // type of piece
+    // checks if the move performed is a single movement diagonally,
+    // and if the piece being moved is a double, backwards movement
+    // is also accepted. Also, if the piece moves 2 spaces diagonally,
+    // it checks if there is an enemy piece in between the original
+    // and moved direction. If yes, the enemy piece is removed, and
+    // the player gets to make another move. Also, after a capture
+    // is performed, make it so the player gets to chose whether or
+    // not he would like to try again (type "end" to end turn).
+
+    let mut check_for_capture = false;
+    // check if the movement in the y-direction is appropriate.
+    match whos_turn {
+        &PlayerTurn::P1 => match stats.get(&(*a, *b)).unwrap().level {
+            Level::Single => match d - b {
+                1 => {}
+                2 => check_for_capture = true,
+                _ => return false,
+            },
+            Level::Double => match d - b {
+                1 | -1 => {}
+                2 | -2 => check_for_capture = true,
+                _ => return false,
+            },
+            Level::NA => {
+                panic!("error occurred at logic test 2.0");
+            }
+        },
+        &PlayerTurn::P2 => match stats.get(&(*a, *b)).unwrap().level {
+            Level::Single => match d - b {
+                1 => {}
+                2 => check_for_capture = true,
+                _ => return false,
+            },
+            Level::Double => match d - b {
+                1 | -1 => {}
+                2 | -2 => check_for_capture = true,
+                _ => return false,
+            },
+            Level::NA => {
+                panic!("error occurred at logic test 2.1");
+            }
+        },
+    }
+
+    // check if the movement in the x direction is appropriate,
+    // relative to the y.
+    match d - b {
+        1 | -1 => match c - a {
+            1 | -1 => {}
+            _ => return false,
+        },
+        2 | -2 => match c - a {
+            2 | -2 => {}
+            _ => return false,
+        },
+        _ => return false,
+    }
+
+    // if move 2 spaces diagonally, then check what it jumped over.
+    // if it jumped over an empty space or your own piece, then
+    // return false.
+    if check_for_capture {
+        match stats.get(&((a + c) / 2, (b + d) / 2)).unwrap().state {
+            Occupancy::Emp => return false,
+            Occupancy::P1 => {
+                if matches![whos_turn, PlayerTurn::P1] {
+                    return false;
+                }
+            }
+            Occupancy::P2 => {
+                if matches![whos_turn, PlayerTurn::P2] {
+                    return false;
+                }
+            }
+        }
+    }
 
     true
 }
+fn logic_move(
+    whos_turn: &PlayerTurn,
+    double_coodinates: &((i8, i8), (i8, i8)),
+    stats: &mut HashMap<(i8, i8), Tile>,
+) {
+    println!("test");
+}
 
-fn print_board(stats: &HashMap<(u8, u8), Tile>) {
+fn print_board(stats: &HashMap<(i8, i8), Tile>) {
     // spaghetti-code UI printing algorithm:
     println!("    ,______ ______ ______ ______ ______ ______ ______ ______,");
     for y in (0..8).rev() {
