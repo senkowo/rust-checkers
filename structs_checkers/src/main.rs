@@ -13,16 +13,16 @@ struct Tile {
     level: Level,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Copy, Clone)]
 enum Occupancy {
     Emp,
     P1,
     P2,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Copy, Clone)]
 enum Level {
-    NA,
+    Emp,
     Single,
     Double,
 }
@@ -39,9 +39,9 @@ fn main() {
     // Hashmap "stats" stores a key of tuple (i8, i8), which represents
     // the x and y coordinates of a given tile on the checkerboard.
     // For the value of each respective key, there is an instance of
-    // struct "Tile", which stores the tile state (e.g. occupied by
-    // Player 1, Player 2, or empty) and the type of piece on that tile
-    // (e.g. single, double, or NA).
+    // struct "Tile", which stores the enum tile state (e.g. occupied by
+    // Player 1, Player 2, or empty) and the enum for the type of piece
+    // on that tile (e.g. single, double, or empty).
     let mut stats: HashMap<(i8, i8), Tile> = HashMap::new();
 
     // essentially puts all the pieces in the right place by filling in
@@ -140,13 +140,13 @@ fn initialize_pieces(x: i8, y: i8) -> Tile {
             },
             _ => Tile {
                 state: Occupancy::Emp,
-                level: Level::NA,
+                level: Level::Emp,
             },
         }
     } else {
         Tile {
             state: Occupancy::Emp,
-            level: Level::NA,
+            level: Level::Emp,
         }
     }
 }
@@ -171,11 +171,11 @@ fn input_full_coords() -> ((i8, i8), (i8, i8)) {
     // What's happening below:
     // |> ((char, char), (char, char))
     // |=> ((u32, u32), (u32, u32))
-    // |==> ((u8, u8), (u8, u8))
+    // |==> ((i8, i8), (i8, i8))
     // chaos.
     (
         (
-            full_move_action[0] // is char
+            full_move_action[0] // is char (e.g. '4')
                 .to_digit(10) // method to_digit() returns u32.
                 .expect("not a number")
                 .try_into() // method try_into() returns appropriate (u8).
@@ -308,7 +308,7 @@ fn logic_check(
                 2 | -2 => check_for_capture = true,
                 _ => return false,
             },
-            Level::NA => {
+            Level::Emp => {
                 panic!("error occurred at logic test 2.0");
             }
         },
@@ -323,7 +323,7 @@ fn logic_check(
                 2 | -2 => check_for_capture = true,
                 _ => return false,
             },
-            Level::NA => {
+            Level::Emp => {
                 panic!("error occurred at logic test 2.1");
             }
         },
@@ -362,14 +362,55 @@ fn logic_check(
         }
     }
 
-    true
+    true // the default output if it survives all the checks
 }
 fn logic_move(
     whos_turn: &PlayerTurn,
     double_coodinates: &((i8, i8), (i8, i8)),
     stats: &mut HashMap<(i8, i8), Tile>,
 ) {
-    println!("test");
+    println!("whos_turn: {:?}", whos_turn);
+    println!("double_coordinates: {:?}", double_coodinates);
+    println!("stats: {:?}", stats);
+
+    let ((a, b), (c, d)) = double_coodinates;
+
+    // first, change the state(P1/emp) and level(Single/emp) of
+    // the initial and destination moves.
+
+    // create/new (from Emp)
+    stats.insert(
+        (*c, *d),
+        Tile {
+            state: stats.get(&(*a, *b)).unwrap().clone().state,
+            level: stats.get(&(*a, *b)).unwrap().clone().level,
+        }
+    );
+    // overwrite initial
+    stats.insert(
+        (*a, *b),
+        Tile {
+            state: Occupancy::Emp,
+            level: Level::Emp,
+        }
+    );
+
+    // then, if it jumps over a piece (already confirmed to be
+    // enemy's), then remove that piece (state.Occupancy::Emp)
+    match d - b {
+        2 | -2 => {
+            stats.insert(
+                ((a+c)/2, (b+d)/2),
+                Tile {
+                    state: Occupancy::Emp,
+                    level: Level::Emp,
+                }
+            );
+        }
+        _ => {}
+    }
+
+
 }
 
 fn print_board(stats: &HashMap<(i8, i8), Tile>) {
