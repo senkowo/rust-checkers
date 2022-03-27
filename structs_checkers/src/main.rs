@@ -1,3 +1,9 @@
+
+// for deleting items/taking ownership from hashmap:
+// https://stackoverflow.com/questions/43416196/return-exact-value-in-rust-hashmap
+//
+
+
 use std::collections::HashMap;
 use std::convert::TryInto;
 use std::io::{self, Write};
@@ -50,10 +56,9 @@ fn main() {
 
     print_board(&stats);
 
-
     let mut whos_turn = PlayerTurn::P1;
     loop {
-        print_board(&stats);
+        //print_board(&stats);
         println!(
             "\n{}'s turn!",
             if matches![whos_turn, PlayerTurn::P1] {
@@ -63,26 +68,19 @@ fn main() {
             }
         );
         let full_move_argument = input_full_coords();
-        let ((a, b), (c, d)) = full_move_argument;
-        let a: u8 = a.try_into().unwrap();
-        let b: u8 = b.try_into().unwrap();
-        let c: u8 = c.try_into().unwrap();
-        let d: u8 = d.try_into().unwrap();
-        let full_move_argument = ((a, b), (c, d));
 
         println!("full move argument: {:?}", full_move_argument);
 
         // logic: check if first coord belongs to P1, then if the
         // destination is a valid movement (also consider double).
-        let valid: bool = logic_check(&full_move_argument, &stats);
-
+        let valid: bool = logic_check(&whos_turn, &full_move_argument, &stats);
+        println!("logic_check: {:?}", valid);
 
         if matches![whos_turn, PlayerTurn::P1] {
             whos_turn = PlayerTurn::P2;
         } else {
             whos_turn = PlayerTurn::P1;
         }
-
     }
 }
 
@@ -146,7 +144,7 @@ fn initialize_pieces(x: u8, y: u8) -> Tile {
     }
 }
 
-fn input_full_coords() -> ((u32, u32), (u32, u32)) {
+fn input_full_coords() -> ((u8, u8), (u8, u8)) {
     let mut full_move_action: Vec<char> = Vec::new();
 
     let first_output_of_chars = input_single_coords(1);
@@ -163,15 +161,35 @@ fn input_full_coords() -> ((u32, u32), (u32, u32)) {
         }
     }
 
-    // ((char, char), (char, char)) => ((u32, u32), (u32, u32))
+    // What's happening below:
+    // |> ((char, char), (char, char))
+    // |=> ((u32, u32), (u32, u32))
+    // |==> ((u8, u8), (u8, u8))
+    // chaos.
     (
         (
-            full_move_action[0].to_digit(10).expect("not a number"),
-            full_move_action[1].to_digit(10).expect("not a number"),
+            full_move_action[0] // is char
+                .to_digit(10) // method to_digit() returns u32.
+                .expect("not a number")
+                .try_into() // method try_into() returns appropriate (u8).
+                .unwrap(),
+            full_move_action[1]
+                .to_digit(10)
+                .expect("not a number")
+                .try_into()
+                .unwrap(),
         ),
         (
-            full_move_action[2].to_digit(10).expect("not a number"),
-            full_move_action[3].to_digit(10).expect("not a number"),
+            full_move_action[2]
+                .to_digit(10)
+                .expect("not a number")
+                .try_into()
+                .unwrap(),
+            full_move_action[3]
+                .to_digit(10)
+                .expect("not a number")
+                .try_into()
+                .unwrap(),
         ),
     )
 }
@@ -223,7 +241,43 @@ fn input_single_coords(first_or_second: u8) -> Vec<char> {
     }
 }
 
-fn logic_check(double_coodinates: &((u8, u8), (u8, u8)), stats: &HashMap<(u8, u8), Tile>) -> bool {
+fn logic_check(whos_turn: &PlayerTurn, double_coodinates: &((u8, u8), (u8, u8)), stats: &HashMap<(u8, u8), Tile>) -> bool {
+    let ((a, b), (c, d)) = double_coodinates;
+    println!("stats status: {:?}", stats.get(&(*a, *b)).unwrap().state);
+
+    // checks if first coord is the current player's piece and if
+    // second coord is empty.
+    match whos_turn {
+        &PlayerTurn::P1 => {
+            if matches![stats.get(&(*a, *b)).unwrap().state, Occupancy::P1] {
+                println!("coord 1 is correct");
+                if matches![stats.get(&(*c, *d)).unwrap().state, Occupancy::Emp] {
+                    println!("coord 2 is correct");
+                } else {
+                    return false;
+                }
+            } else {
+                return false;
+            }
+        }
+        &PlayerTurn::P2 => {
+            if matches![stats.get(&(*a, *b)).unwrap().state, Occupancy::P2] {
+                println!("coord 1 is correct");
+                if matches![stats.get(&(*c, *d)).unwrap().state, Occupancy::Emp] {
+                    println!("coord 2 is correct");
+                } else {
+                    return false;
+                }
+            } else {
+                return false;
+            }
+
+        }
+    }
+
+    // now check for movement logic based on coordinate movement and
+    // type of piece
+
     true
 }
 
