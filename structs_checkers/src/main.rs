@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::convert::TryInto;
 use std::io::{self, Write};
 // .flush() depends on std::io::Write
 
@@ -22,6 +23,12 @@ enum Level {
     Double,
 }
 
+#[derive(Debug)]
+enum PlayerTurn {
+    P1,
+    P2,
+}
+
 fn main() {
     introduction();
 
@@ -35,28 +42,48 @@ fn main() {
 
     // essentially puts all the pieces in the right place by filling in
     // the keys and values of "stats" appropriately.
-    for y in 0..10 {
-        for x in 0..10 {
+    for y in 0..8 {
+        for x in 0..8 {
             stats.insert((x, y), initialize_pieces(x, y));
         }
     }
 
-    //for (key, value) in &stats {
-    //    println!("Key: {:?}\tValue: {:?}", key, value);
-    //}
-
     print_board(&stats);
 
-    let mut full_move_action = Vec::new();
 
-    let first_ret = input_first_coord();
-    for v in first_ret.iter() {
-        full_move_action.push(v)
+    let mut whos_turn = PlayerTurn::P1;
+    loop {
+        print_board(&stats);
+        println!(
+            "\n{}'s turn!",
+            if matches![whos_turn, PlayerTurn::P1] {
+                "Player 1"
+            } else {
+                "Player 2"
+            }
+        );
+        let full_move_argument = input_full_coords();
+        let ((a, b), (c, d)) = full_move_argument;
+        let a: u8 = a.try_into().unwrap();
+        let b: u8 = b.try_into().unwrap();
+        let c: u8 = c.try_into().unwrap();
+        let d: u8 = d.try_into().unwrap();
+        let full_move_argument = ((a, b), (c, d));
+
+        println!("full move argument: {:?}", full_move_argument);
+
+        // logic: check if first coord belongs to P1, then if the
+        // destination is a valid movement (also consider double).
+        let valid: bool = logic_check(&full_move_argument, &stats);
+
+
+        if matches![whos_turn, PlayerTurn::P1] {
+            whos_turn = PlayerTurn::P2;
+        } else {
+            whos_turn = PlayerTurn::P1;
+        }
+
     }
-    println!("full_move action before second: {:#?}", full_move_action);
-
-
-    input_second_coord();
 }
 
 fn introduction() {
@@ -66,8 +93,8 @@ fn introduction() {
     clear();
     println!(
         "{}{}{}{}",
-        "\n\n\tcli-checkers\n\n\n",
-        "\tType \"h\" for how to play the game\n\n\n",
+        "\n\n\n\tcli-checkers\n\n\n",
+        "\tType \"h\" for how to play the game\n\n\n\n",
         "\t<insert ascii art here>\n\n\n\n",
         "\tPress enter key to begin"
     );
@@ -102,21 +129,14 @@ fn initialize_pieces(x: u8, y: u8) -> Tile {
                 state: Occupancy::P1,
                 level: Level::Single,
             },
-            3..=6 => Tile {
-                state: Occupancy::Emp,
-                level: Level::NA,
-            },
-            7..=9 => Tile {
+            5..=7 => Tile {
                 state: Occupancy::P2,
                 level: Level::Single,
             },
-            _ => {
-                println!("error!!!");
-                Tile {
-                    state: Occupancy::Emp,
-                    level: Level::NA,
-                }
-            }
+            _ => Tile {
+                state: Occupancy::Emp,
+                level: Level::NA,
+            },
         }
     } else {
         Tile {
@@ -126,43 +146,91 @@ fn initialize_pieces(x: u8, y: u8) -> Tile {
     }
 }
 
-fn input_first_coord() -> Vec<char> {
-    loop {
-        print!("Input move argument (e.g. \"3 2\", \"32\", \"32 54\", \"3254\"): ");
+fn input_full_coords() -> ((u32, u32), (u32, u32)) {
+    let mut full_move_action: Vec<char> = Vec::new();
+
+    let first_output_of_chars = input_single_coords(1);
+    for v in first_output_of_chars.iter() {
+        full_move_action.push(*v);
+    }
+
+    println!("full_move action before second: {:?}", full_move_action);
+
+    if full_move_action.len() == 2 {
+        let second_output_of_chars = input_single_coords(2);
+        for v in second_output_of_chars.iter() {
+            full_move_action.push(*v);
+        }
+    }
+
+    // ((char, char), (char, char)) => ((u32, u32), (u32, u32))
+    (
+        (
+            full_move_action[0].to_digit(10).expect("not a number"),
+            full_move_action[1].to_digit(10).expect("not a number"),
+        ),
+        (
+            full_move_action[2].to_digit(10).expect("not a number"),
+            full_move_action[3].to_digit(10).expect("not a number"),
+        ),
+    )
+}
+fn input_single_coords(first_or_second: u8) -> Vec<char> {
+    'outer: loop {
+        if first_or_second == 1 {
+            print!("\nInput piece to move or full move argument: ");
+        } else {
+            print!("\nInput move location: ");
+        }
         ioflush();
         let input = user_input();
 
-        let mut input_as_chars: Vec<char> = input.chars().collect();
-        let number_chars: Vec<char> = vec!['1', '2', '3', '4', '5', '6', '7', '8', '9'];
-        let mut chars_to_remove_from_number_chars: Vec<usize> = Vec::new();
-        for (i, c) in input_as_chars.iter_mut().enumerate() {
-            if !number_chars.contains(c) {
-                chars_to_remove_from_number_chars.push(i);
+        let input_as_chars: Vec<char> = input.chars().collect();
+        let number_chars: Vec<char> = vec!['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+        let mut output_as_chars: Vec<char> = Vec::new();
+        for c in input_as_chars.iter() {
+            if *c == '8' || *c == '9' {
+                println!(
+                    "Error: The number {} is not on the board. Please try again.",
+                    c
+                );
+                continue 'outer;
+            }
+            if number_chars.contains(c) {
+                output_as_chars.push(*c);
             }
         }
-        println!("chars_to_remove_from_number_chars: {:#?}", chars_to_remove_from_number_chars);
-        for i in chars_to_remove_from_number_chars {
-            input_as_chars.remove(i);
-            println!("i value: {:#?}", i);
-        }
 
-        println!("input_as_chars: {:#?}", input_as_chars);
+        println!("output_as_chars: {:?}", output_as_chars);
 
-        if (input_as_chars.len() == 2) || (input_as_chars.len() == 4) {
-            return input_as_chars;
-        }
+        match first_or_second {
+            1 => {
+                if (output_as_chars.len() == 2) || (output_as_chars.len() == 4) {
+                    return output_as_chars;
+                } else {
+                    println!("incorrect input; can only be 2 or 4 numbers.");
+                }
+            }
+            2 => {
+                if output_as_chars.len() == 2 {
+                    return output_as_chars;
+                } else {
+                    println!("incorrent input; can only be 2 numbers.");
+                }
+            }
+            _ => println!("error at first_or_second"),
+        };
     }
 }
-fn input_second_coord() {
 
+fn logic_check(double_coodinates: &((u8, u8), (u8, u8)), stats: &HashMap<(u8, u8), Tile>) -> bool {
+    true
 }
-
-
 
 fn print_board(stats: &HashMap<(u8, u8), Tile>) {
     // spaghetti-code UI printing algorithm:
-    println!("    ,______ ______ ______ ______ ______ ______ ______ ______ ______ ______,");
-    for y in (0..10).rev() {
+    println!("    ,______ ______ ______ ______ ______ ______ ______ ______,");
+    for y in (0..8).rev() {
         for s in 0..2 {
             print!(
                 "  {} |",
@@ -173,7 +241,7 @@ fn print_board(stats: &HashMap<(u8, u8), Tile>) {
                 }
             );
             ioflush();
-            for x in 0..10 {
+            for x in 0..8 {
                 for (k, v) in stats {
                     // "*k" or "&(x, y)"???
                     if *k == (x, y) {
@@ -200,10 +268,10 @@ fn print_board(stats: &HashMap<(u8, u8), Tile>) {
         if y == 0 {
             continue;
         };
-        println!("    |------ ------ ------ ------ ------ ------ ------ ------ ------ ------|");
+        println!("    |------ ------ ------ ------ ------ ------ ------ ------|");
     }
-    println!("    '---------------------------------------------------------------------'");
-    println!("        0      1      2      3      4      5      6      7      8      9");
+    println!("    '--------------------------------------------------------'");
+    println!("        0      1      2      3      4      5      6      7   ");
 }
 
 fn sleep(s: u64) {
