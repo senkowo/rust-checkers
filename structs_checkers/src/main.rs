@@ -61,6 +61,8 @@ fn main() {
 
         if enter_pressed_in_second_play {
             change_current_player(&mut whos_turn);
+            player_goes_again = false;
+            continue;
         }
 
         //println!("full move argument: {:?}", full_move_argument); //debug
