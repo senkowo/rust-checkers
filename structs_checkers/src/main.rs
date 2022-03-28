@@ -54,13 +54,13 @@ fn main() {
         }
     }
 
-
     let mut whos_turn = PlayerTurn::P1;
     let mut player_goes_again = false;
     loop {
         clear();
         print_board(&stats);
-        let (full_move_argument, enter_pressed_in_second_play, escape_current_entry) = input_full_coords(&whos_turn, player_goes_again, &stats);
+        let (full_move_argument, enter_pressed_in_second_play, escape_current_entry) =
+            input_full_coords(&whos_turn, player_goes_again, &stats);
 
         if enter_pressed_in_second_play {
             change_current_player(&mut whos_turn);
@@ -81,7 +81,6 @@ fn main() {
         //println!("logic_check: {:?}", valid); //debug
 
         //print_board(&stats);
-        
 
         if !valid {
             println!("invalid input, please try again.");
@@ -102,9 +101,7 @@ fn main() {
         // make this action always available...? Actually, maybe
         // that wont work... check rules for checkers...
 
-
         change_current_player(&mut whos_turn);
-        
     }
 }
 
@@ -169,35 +166,26 @@ fn initialize_pieces(x: i8, y: i8) -> Tile {
 }
 
 fn input_full_coords(
-    whos_turn: &PlayerTurn, 
-    player_goes_again: bool, 
+    whos_turn: &PlayerTurn,
+    player_goes_again: bool,
     stats: &HashMap<(i8, i8), Tile>,
 ) -> (((i8, i8), (i8, i8)), bool, bool) {
     let mut full_move_action: Vec<char> = Vec::new();
 
-    let first_output_of_chars = input_single_coords(1, player_goes_again, &whos_turn, &stats);
-    println!("what is array first_output_of_chars?: {:#?}", first_output_of_chars);
+    let first_output_of_chars: Vec<char> =
+        input_single_coords(1, player_goes_again, &whos_turn, &stats);
+    println!("log: first_output_of_chars?: {:#?}", first_output_of_chars);
     match first_output_of_chars.get(0) {
         Some(v) => {
             if *v == 'e' {
                 println!("log: char e received");
                 return (((0, 0), (0, 0)), true, false);
             }
-        },
-        None => {},
-        // convoluted, but it works
-        // true, false means that blank enter was pressed...
+        }
+        None => {} // convoluted, but it works
+                   // true, false means that blank enter was pressed...
     }
-    match first_output_of_chars.get(2) {
-        Some(v) => {
-            if *v == 'x' {
-                println!("log: char x received");
-                return (((0, 0), (0, 0)), false, true);
-            }
-        },
-        None => {},
-    }
-    for v in first_output_of_chars.iter() {
+        for v in first_output_of_chars.iter() {
         full_move_action.push(*v);
     }
 
@@ -205,7 +193,16 @@ fn input_full_coords(
 
     if full_move_action.len() == 2 {
         let second_output_of_chars = input_single_coords(2, player_goes_again, whos_turn, &stats);
-        for v in second_output_of_chars.iter() {
+        match second_output_of_chars.get(0) {
+            Some(v) => {
+                if *v == 'x' {
+                    println!("log: char x received");
+                    return (((0, 0), (0, 0)), false, true);
+                }
+            }
+            None => {}
+        }
+for v in second_output_of_chars.iter() {
             full_move_action.push(*v);
         }
     }
@@ -216,38 +213,41 @@ fn input_full_coords(
     // |==> ((i8, i8), (i8, i8))
     // chaos.
     (
-    (
         (
-            full_move_action[0] // is char (e.g. '4')
-                .to_digit(10) // method to_digit() returns u32.
-                .expect("not a number")
-                .try_into() // method try_into() returns appropriate (u8).
-                .unwrap(),
-            full_move_action[1]
-                .to_digit(10)
-                .expect("not a number")
-                .try_into()
-                .unwrap(),
+            (
+                full_move_action[0] // is char (e.g. '4')
+                    .to_digit(10) // method to_digit() returns u32.
+                    .unwrap()
+                    .try_into() // method try_into() returns appropriate (u8).
+                    .unwrap(),
+                full_move_action[1]
+                    .to_digit(10)
+                    .unwrap()
+                    .try_into()
+                    .unwrap(),
+            ),
+            (
+                full_move_action[2]
+                    .to_digit(10)
+                    .unwrap()
+                    .try_into()
+                    .unwrap(),
+                full_move_action[3]
+                    .to_digit(10)
+                    .unwrap()
+                    .try_into()
+                    .unwrap(),
+            ),
         ),
-        (
-            full_move_action[2]
-                .to_digit(10)
-                .expect("not a number")
-                .try_into()
-                .unwrap(),
-            full_move_action[3]
-                .to_digit(10)
-                .expect("not a number")
-                .try_into()
-                .unwrap(),
-        ),
-    ) , false, false)
+        false,
+        false,
+    )
 }
 fn input_single_coords(
     first_or_second: u8,
     player_goes_again: bool,
     whos_turn: &PlayerTurn,
-    stats: &HashMap<(i8, i8), Tile>
+    stats: &HashMap<(i8, i8), Tile>,
 ) -> Vec<char> {
     'outer: loop {
         if player_goes_again {
@@ -276,17 +276,27 @@ fn input_single_coords(
         );
         ioflush();
         let input = user_input();
+        println!("single user input {:?}", input);
         if player_goes_again {
             match &input[..] {
                 // messy code
-                "" | "end" => return vec!['e'],
+                "" | "end" => {
+                    println!("log: e is being returned from single input");
+                    sleep(2);
+                    return vec!['e'];
+                }
                 _ => {}
             }
         }
         println!("is it first or second: {:?}", first_or_second);
         if first_or_second == 2 {
-            if &input[..] == "esc" {
-                return vec!['x'];
+            match &input[..] {
+                "esc" => {
+                    println!("log: detect esc, return 'x' ");
+                    sleep(2);
+                    return vec!['x'];
+                }
+                _ => {}
             }
         }
 
@@ -464,7 +474,7 @@ fn logic_move(
         Tile {
             state: stats.get(&(*a, *b)).unwrap().clone().state,
             level: stats.get(&(*a, *b)).unwrap().clone().level,
-        }
+        },
     );
     // overwrite initial
     stats.insert(
@@ -472,7 +482,7 @@ fn logic_move(
         Tile {
             state: Occupancy::Emp,
             level: Level::Emp,
-        }
+        },
     );
 
     // then, if it jumps over a piece (already confirmed to be
@@ -480,18 +490,18 @@ fn logic_move(
     match d - b {
         2 | -2 => {
             stats.insert(
-                ((a+c)/2, (b+d)/2),
+                ((a + c) / 2, (b + d) / 2),
                 Tile {
                     state: Occupancy::Emp,
                     level: Level::Emp,
-                }
+                },
             );
             true
         }
         // if an enemy piece is taken, return true and if not,
         // return false. The function return goes into variable
         // "player_goes_again: bool".
-        _ => false
+        _ => false,
     }
 }
 
