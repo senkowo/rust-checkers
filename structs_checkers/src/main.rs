@@ -52,34 +52,38 @@ fn main() {
         }
     }
 
-    print_board(&stats);
 
     let mut whos_turn = PlayerTurn::P1;
+    let mut player_goes_again = false;
     loop {
         print_board(&stats);
-        println!(
-            "\n{}'s turn!",
-            if matches![whos_turn, PlayerTurn::P1] {
-                "Player 1"
-            } else {
-                "Player 2"
-            }
-        );
-        let full_move_argument = input_full_coords();
+        let (full_move_argument, enter_pressed_in_second_play) = input_full_coords(&whos_turn, player_goes_again, &stats);
 
-        println!("full move argument: {:?}", full_move_argument);
+        if enter_pressed_in_second_play {
+            change_current_player(&mut whos_turn);
+        }
+
+        //println!("full move argument: {:?}", full_move_argument); //debug
 
         // logic: check if first coord belongs to P1, then if the
         // destination is a valid movement (also consider double).
         let valid = logic_check(&whos_turn, &full_move_argument, &stats);
-        println!("logic_check: {:?}", valid);
+        //println!("logic_check: {:?}", valid); //debug
+
+        //print_board(&stats);
+        
 
         if !valid {
             println!("invalid input, please try again.");
             continue;
         }
 
-        let player_goes_again = logic_move(&whos_turn, &full_move_argument, &mut stats);
+        player_goes_again = logic_move(&whos_turn, &full_move_argument, &mut stats);
+        if player_goes_again {
+            continue;
+        } else {
+            player_goes_again = false;
+        }
         // now, make it so if player_goes_again is true, player
         // gets to go again. perhaps declare as mutable at the
         // top, so can start at the top of loop, and print line
@@ -89,11 +93,8 @@ fn main() {
         // that wont work... check rules for checkers...
 
 
-        if matches![whos_turn, PlayerTurn::P1] {
-            whos_turn = PlayerTurn::P2;
-        } else {
-            whos_turn = PlayerTurn::P1;
-        }
+        change_current_player(&mut whos_turn);
+        
     }
 }
 
@@ -157,18 +158,22 @@ fn initialize_pieces(x: i8, y: i8) -> Tile {
     }
 }
 
-fn input_full_coords() -> ((i8, i8), (i8, i8)) {
+fn input_full_coords(whos_turn: &PlayerTurn, player_goes_again: bool, stats: &HashMap<(i8, i8), Tile>) -> (((i8, i8), (i8, i8)), bool) {
     let mut full_move_action: Vec<char> = Vec::new();
 
-    let first_output_of_chars = input_single_coords(1);
+    let first_output_of_chars = input_single_coords(1, player_goes_again, &whos_turn, &stats);
+    if first_output_of_chars[0] == 'e' {
+        // convoluted, but it works
+        return (((0, 0), (0, 0)), true); // true means that blank enter was pressed...
+    }
     for v in first_output_of_chars.iter() {
         full_move_action.push(*v);
     }
 
-    println!("full_move action before second: {:?}", full_move_action);
+    //println!("full_move action before second: {:?}", full_move_action); //debug
 
     if full_move_action.len() == 2 {
-        let second_output_of_chars = input_single_coords(2);
+        let second_output_of_chars = input_single_coords(2, player_goes_again, whos_turn, &stats);
         for v in second_output_of_chars.iter() {
             full_move_action.push(*v);
         }
@@ -179,6 +184,7 @@ fn input_full_coords() -> ((i8, i8), (i8, i8)) {
     // |=> ((u32, u32), (u32, u32))
     // |==> ((i8, i8), (i8, i8))
     // chaos.
+    (
     (
         (
             full_move_action[0] // is char (e.g. '4')
@@ -204,17 +210,48 @@ fn input_full_coords() -> ((i8, i8), (i8, i8)) {
                 .try_into()
                 .unwrap(),
         ),
-    )
+    ) , false )
 }
-fn input_single_coords(first_or_second: u8) -> Vec<char> {
+fn input_single_coords(
+    first_or_second: u8,
+    player_goes_again: bool,
+    whos_turn: &PlayerTurn,
+    stats: &HashMap<(i8, i8), Tile>
+) -> Vec<char> {
     'outer: loop {
-        if first_or_second == 1 {
-            print!("\nInput piece to move or full move argument: ");
-        } else {
-            print!("\nInput move location: ");
+        if player_goes_again {
+            print!(
+                "{} goes again. Press \"enter\" without arguments to end turn.",
+                if matches![whos_turn, PlayerTurn::P1] {
+                    "Player 1"
+                } else {
+                    "Player 2"
+                }
+            );
         }
         ioflush();
+        print!(
+            "\n{}: {}",
+            if matches![whos_turn, PlayerTurn::P1] {
+                "Player 1"
+            } else {
+                "Player 2"
+            },
+            if first_or_second == 1 {
+                "Input piece location or full move argument: "
+            } else {
+                "Input move location: "
+            }
+        );
+        ioflush();
         let input = user_input();
+        if player_goes_again {
+            match &input[..] {
+                // messy code
+                "" | "end" => return vec!['e'],
+                _ => {}
+            }
+        }
 
         let input_as_chars: Vec<char> = input.chars().collect();
         let number_chars: Vec<char> = vec!['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
@@ -232,7 +269,7 @@ fn input_single_coords(first_or_second: u8) -> Vec<char> {
             }
         }
 
-        println!("output_as_chars: {:?}", output_as_chars);
+        //println!("output_as_chars: {:?}", output_as_chars); //debug
 
         match first_or_second {
             1 => {
@@ -260,16 +297,16 @@ fn logic_check(
     stats: &HashMap<(i8, i8), Tile>,
 ) -> bool {
     let ((a, b), (c, d)) = double_coodinates;
-    println!("stats status: {:?}", stats.get(&(*a, *b)).unwrap().state);
+    //println!("stats status: {:?}", stats.get(&(*a, *b)).unwrap().state); //debug
 
     // checks if the first coordinate is the current player's piece
     // and if the second coordinate is empty.
     match whos_turn {
         &PlayerTurn::P1 => {
             if matches![stats.get(&(*a, *b)).unwrap().state, Occupancy::P1] {
-                println!("coord 1 is correct");
+                //println!("coord 1 is correct"); //debug
                 if matches![stats.get(&(*c, *d)).unwrap().state, Occupancy::Emp] {
-                    println!("coord 2 is correct");
+                    //println!("coord 2 is correct"); //debug
                 } else {
                     return false;
                 }
@@ -279,9 +316,9 @@ fn logic_check(
         }
         &PlayerTurn::P2 => {
             if matches![stats.get(&(*a, *b)).unwrap().state, Occupancy::P2] {
-                println!("coord 1 is correct");
+                //println!("coord 1 is correct"); //debug
                 if matches![stats.get(&(*c, *d)).unwrap().state, Occupancy::Emp] {
-                    println!("coord 2 is correct");
+                    //println!("coord 2 is correct"); //debug
                 } else {
                     return false;
                 }
@@ -375,9 +412,9 @@ fn logic_move(
     double_coodinates: &((i8, i8), (i8, i8)),
     stats: &mut HashMap<(i8, i8), Tile>,
 ) -> bool {
-    println!("whos_turn: {:?}", whos_turn);
-    println!("double_coordinates: {:?}", double_coodinates);
-    //println!("stats: {:?}", stats);
+    //println!("whos_turn: {:?}", whos_turn); //debug
+    //println!("double_coordinates: {:?}", double_coodinates); //debug
+    //println!("stats: {:?}", stats); //debug
 
     let ((a, b), (c, d)) = double_coodinates;
 
@@ -484,4 +521,11 @@ fn user_input() -> String {
         .expect("OwO what's this? Failed to read line");
     ret.pop();
     ret
+}
+fn change_current_player(whos_turn: &mut PlayerTurn) {
+    if matches![whos_turn, PlayerTurn::P1] {
+        *whos_turn = PlayerTurn::P2;
+    } else {
+        *whos_turn = PlayerTurn::P1;
+    }
 }
