@@ -36,6 +36,8 @@ enum PlayerTurn {
 fn main() {
     introduction();
 
+    clear();
+
     // Hashmap "stats" stores a key of tuple (i8, i8), which represents
     // the x and y coordinates of a given tile on the checkerboard.
     // For the value of each respective key, there is an instance of
@@ -56,12 +58,18 @@ fn main() {
     let mut whos_turn = PlayerTurn::P1;
     let mut player_goes_again = false;
     loop {
+        clear();
         print_board(&stats);
-        let (full_move_argument, enter_pressed_in_second_play) = input_full_coords(&whos_turn, player_goes_again, &stats);
+        let (full_move_argument, enter_pressed_in_second_play, escape_current_entry) = input_full_coords(&whos_turn, player_goes_again, &stats);
 
         if enter_pressed_in_second_play {
             change_current_player(&mut whos_turn);
             player_goes_again = false;
+            continue;
+        }
+
+        if escape_current_entry {
+            player_goes_again = true;
             continue;
         }
 
@@ -160,13 +168,34 @@ fn initialize_pieces(x: i8, y: i8) -> Tile {
     }
 }
 
-fn input_full_coords(whos_turn: &PlayerTurn, player_goes_again: bool, stats: &HashMap<(i8, i8), Tile>) -> (((i8, i8), (i8, i8)), bool) {
+fn input_full_coords(
+    whos_turn: &PlayerTurn, 
+    player_goes_again: bool, 
+    stats: &HashMap<(i8, i8), Tile>,
+) -> (((i8, i8), (i8, i8)), bool, bool) {
     let mut full_move_action: Vec<char> = Vec::new();
 
     let first_output_of_chars = input_single_coords(1, player_goes_again, &whos_turn, &stats);
-    if first_output_of_chars[0] == 'e' {
+    println!("what is array first_output_of_chars?: {:#?}", first_output_of_chars);
+    match first_output_of_chars.get(0) {
+        Some(v) => {
+            if *v == 'e' {
+                println!("log: char e received");
+                return (((0, 0), (0, 0)), true, false);
+            }
+        },
+        None => {},
         // convoluted, but it works
-        return (((0, 0), (0, 0)), true); // true means that blank enter was pressed...
+        // true, false means that blank enter was pressed...
+    }
+    match first_output_of_chars.get(2) {
+        Some(v) => {
+            if *v == 'x' {
+                println!("log: char x received");
+                return (((0, 0), (0, 0)), false, true);
+            }
+        },
+        None => {},
     }
     for v in first_output_of_chars.iter() {
         full_move_action.push(*v);
@@ -212,7 +241,7 @@ fn input_full_coords(whos_turn: &PlayerTurn, player_goes_again: bool, stats: &Ha
                 .try_into()
                 .unwrap(),
         ),
-    ) , false )
+    ) , false, false)
 }
 fn input_single_coords(
     first_or_second: u8,
@@ -252,6 +281,12 @@ fn input_single_coords(
                 // messy code
                 "" | "end" => return vec!['e'],
                 _ => {}
+            }
+        }
+        println!("is it first or second: {:?}", first_or_second);
+        if first_or_second == 2 {
+            if &input[..] == "esc" {
+                return vec!['x'];
             }
         }
 
