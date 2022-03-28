@@ -56,7 +56,7 @@ fn main() {
 
     let mut whos_turn = PlayerTurn::P1;
     loop {
-        //print_board(&stats);
+        print_board(&stats);
         println!(
             "\n{}'s turn!",
             if matches![whos_turn, PlayerTurn::P1] {
@@ -79,8 +79,14 @@ fn main() {
             continue;
         }
 
-        logic_move(&whos_turn, &full_move_argument, &mut stats);
-
+        let player_goes_again = logic_move(&whos_turn, &full_move_argument, &mut stats);
+        // now, make it so if player_goes_again is true, player
+        // gets to go again. perhaps declare as mutable at the
+        // top, so can start at the top of loop, and print line
+        // if player gets to go again, and allow the option for
+        // the user to skip by entering without arguments. Maybe
+        // make this action always available...? Actually, maybe
+        // that wont work... check rules for checkers...
 
 
         if matches![whos_turn, PlayerTurn::P1] {
@@ -314,8 +320,8 @@ fn logic_check(
         },
         &PlayerTurn::P2 => match stats.get(&(*a, *b)).unwrap().level {
             Level::Single => match d - b {
-                1 => {}
-                2 => check_for_capture = true,
+                -1 => {}
+                -2 => check_for_capture = true,
                 _ => return false,
             },
             Level::Double => match d - b {
@@ -368,10 +374,10 @@ fn logic_move(
     whos_turn: &PlayerTurn,
     double_coodinates: &((i8, i8), (i8, i8)),
     stats: &mut HashMap<(i8, i8), Tile>,
-) {
+) -> bool {
     println!("whos_turn: {:?}", whos_turn);
     println!("double_coordinates: {:?}", double_coodinates);
-    println!("stats: {:?}", stats);
+    //println!("stats: {:?}", stats);
 
     let ((a, b), (c, d)) = double_coodinates;
 
@@ -406,11 +412,10 @@ fn logic_move(
                     level: Level::Emp,
                 }
             );
+            true
         }
-        _ => {}
+        _ => false
     }
-
-
 }
 
 fn print_board(stats: &HashMap<(i8, i8), Tile>) {
