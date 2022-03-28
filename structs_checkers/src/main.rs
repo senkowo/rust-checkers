@@ -414,6 +414,9 @@ fn logic_move(
             );
             true
         }
+        // if an enemy piece is taken, return true and if not,
+        // return false. The function return goes into variable
+        // "player_goes_again: bool".
         _ => false
     }
 }
