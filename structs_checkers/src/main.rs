@@ -34,6 +34,7 @@ enum PlayerTurn {
 }
 
 fn main() {
+    // Introduction() stores the menu system before beginning the game.
     introduction();
 
     clear();
@@ -46,8 +47,8 @@ fn main() {
     // on that tile (e.g. single, double, or empty).
     let mut stats: HashMap<(i8, i8), Tile> = HashMap::new();
 
-    // essentially puts all the pieces in the right place by filling in
-    // the keys and values of "stats" appropriately.
+    // essentially puts all the pieces in the right place of the board by
+    // filling in the keys and values of "stats" appropriately.
     for y in 0..8 {
         for x in 0..8 {
             stats.insert((x, y), initialize_pieces(x, y));
@@ -59,8 +60,9 @@ fn main() {
     loop {
         clear();
         print_board(&stats);
+        //
         let (full_move_argument, enter_pressed_in_second_play, escape_current_entry) =
-            input_full_coords(&whos_turn, &mut player_goes_again, &stats);
+            input_full_coords(&whos_turn,&mut player_goes_again, &stats);
 
         if enter_pressed_in_second_play {
             change_current_player(&mut whos_turn);
@@ -149,7 +151,7 @@ fn intro_help(input: &str) {
             "\t\"OwO\""
         ),
         "h" | "help" => println!(
-            "{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}",
+            "{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}",
             "\n\n\tWelcome to cli-checkers!\n\n",
             "\tThis is a two-player game where the objective is to capture\n",
             "\tall of the opponent's pieces.\n\n",
@@ -160,7 +162,7 @@ fn intro_help(input: &str) {
             "\t\t\"1223\"\n\n",
             "\tBoth of the examples given moves a piece at coordinates (1, 2)\n",
             "\tto (2, 3).\n\n",
-            "\tIf you were to type "
+            "\tIf you were to type ",
             "\tSpaces and letters are not read when entering coordinates, so\n",
             "\tyou can even do \"e 6 2 1 - 0\" and this will be read as\n",
             "\t(6, 2) => (1, 0). These are not realistically possible\n",
