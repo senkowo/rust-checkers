@@ -141,19 +141,35 @@ fn intro_help(input: &str) {
         "c" | "commands" => println!(
             "{}{}{}{}{}{}{}",
             "\n\n\tList of Commands Available:\n\n",
-            "\tm | menu\n",
-            "\ts | start | \"\" (no args)\n",
-            "\tc | commands\n",
-            "\th | help\n",
-            "\ti | info\n",
-            "\tOwO"
+            "\t\"m\" | \"menu\"\n",
+            "\t\"s\" | \"start\" | \"\" (no args)\n",
+            "\t\"c\" | \"commands\"\n",
+            "\t\"h\" | \"help\"\n",
+            "\t\"i\" | \"info\"\n",
+            "\t\"OwO\""
         ),
         "h" | "help" => println!(
-            "{}{}{}{}",
+            "{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}",
             "\n\n\tWelcome to cli-checkers!\n\n",
-            "\tThis is a two player game where both players",
-            " take turns making a move.\n",
-            "\tThere are several ways to perform a move:"
+            "\tThis is a two-player game where the objective is to capture\n",
+            "\tall of the opponent's pieces.\n\n",
+            "\tWhen performing a move, you first enter the coordinates of\n",
+            "\tthe piece you wish to move; then, the destination coordinates.\n",
+            "\tThere are several ways to enter coordinates:\n\n", 
+            "\t\t\"12\" :enter: \"23\"\n",
+            "\t\t\"1223\"\n\n",
+            "\tBoth of the examples given moves a piece at coordinates (1, 2)\n",
+            "\tto (2, 3).\n\n",
+            "\tIf you were to type "
+            "\tSpaces and letters are not read when entering coordinates, so\n",
+            "\tyou can even do \"e 6 2 1 - 0\" and this will be read as\n",
+            "\t(6, 2) => (1, 0). These are not realistically possible\n",
+            "\tmovements to perform, however.\n\n",
+            "\tLike ordinary Checkers, your piece will gain the ability to\n",
+            "\tmove backwards once you reach the other side of the board.\n",
+            "\t"
+            
+            
         ),
         "i" | "info" => println!(
             ""
@@ -162,7 +178,7 @@ fn intro_help(input: &str) {
             "\nUwU"
         ),
         _ => println!(
-            "\n\n\n\nCommand not found: {}\n{}",
+            "\n\n\n\nCommand not found: \"{}\"\n{}",
             input,
             "See the list of available commands: \"c\" | \"commands\""
         ),
@@ -202,7 +218,7 @@ fn input_full_coords(
 
     let first_output_of_chars: Vec<char> =
         input_single_coords(1, player_goes_again, &whos_turn, &stats);
-    println!("log: first_output_of_chars?: {:#?}", first_output_of_chars);
+    //println!("log: first_output_of_chars?: {:#?}", first_output_of_chars);
     match first_output_of_chars.get(0) {
         Some(v) => {
             if *v == 'e' {
@@ -305,7 +321,7 @@ fn input_single_coords(
         );
         ioflush();
         let input = user_input();
-        println!("single user input {:?}", input);
+        //println!("single user input {:?}", input);
         if *player_goes_again {
             match &input[..] {
                 // messy code
@@ -317,7 +333,7 @@ fn input_single_coords(
                 _ => {}
             }
         }
-        println!("is it first or second: {:?}", first_or_second);
+        //println!("is it first or second: {:?}", first_or_second);
         if first_or_second == 2 {
             match &input[..] {
                 "esc" => {
