@@ -110,34 +110,62 @@ fn introduction() {
     println!("\n\n<Insert Introduction/Spash Screen>");
     sleep(1);
     clear();
-    println!(
-        "{}{}{}{}",
-        "\n\n\n\tcli-checkers\n\n\n",
-        "\tType \"h\" for how to play the game\n\n\n\n",
-        "\t<insert ascii art here>\n\n\n\n",
-        "\tPress enter key to begin"
-    );
+    intro_help("menu");
     loop {
-        print!("\n\n\n\n\nCommand: ");
+        print!("\n\n\n\nCommand: ");
         ioflush();
         let uwu = user_input();
         match &uwu[..] {
-            "h" => intro_help(&uwu),
-            _ => break,
+            "" | "s" | "start" => break,
+            _ => intro_help(&uwu),
         }
     }
 }
 fn intro_help(input: &str) {
     clear();
     match input {
-        "h" => println!(
+        "" | "s" | "start" => {}, // it should never pass through here
+        "m" | "menu" => println!(
+            "{}{}{}{}{}{}{}{}{}{}",
+            "\n\n\n\tcli-checkers\n\n\n",
+            "\tCommands:\n",
+            "\tEnter \"s\" or \"start\" or \"\" (no arguments) to start the game\n",
+            "\tEnter \"m\" or \"menu\" to return to main menu\n",
+            "\tEnter \"c\" or \"commands\" to list all commands\n",
+            "\tEnter \"h\" or \"help\" for game instructions\n",
+            "\tEnter \"i\" or \"info\" for information about the project\n",
+            "\tEnter \"OwO\" for secret\n\n\n",
+            "\t<insert ascii art here>\n\n\n\n",
+            "\tPress enter key to begin"
+        ),
+        "c" | "commands" => println!(
+            "{}{}{}{}{}{}{}",
+            "\n\n\tList of Commands Available:\n\n",
+            "\tm | menu\n",
+            "\ts | start | \"\" (no args)\n",
+            "\tc | commands\n",
+            "\th | help\n",
+            "\ti | info\n",
+            "\tOwO"
+        ),
+        "h" | "help" => println!(
             "{}{}{}{}",
             "\n\n\tWelcome to cli-checkers!\n\n",
             "\tThis is a two player game where both players",
             " take turns making a move.\n",
             "\tThere are several ways to perform a move:"
         ),
-        _ => println!("error"),
+        "i" | "info" => println!(
+            ""
+        ),
+        "OwO" | "owo" | "Owo" => println!(
+            "\nUwU"
+        ),
+        _ => println!(
+            "\n\n\n\nCommand not found: {}\n{}",
+            input,
+            "See the list of available commands: \"c\" | \"commands\""
+        ),
     }
 }
 
