@@ -60,7 +60,7 @@ fn main() {
         clear();
         print_board(&stats);
         let (full_move_argument, enter_pressed_in_second_play, escape_current_entry) =
-            input_full_coords(&whos_turn, player_goes_again, &stats);
+            input_full_coords(&whos_turn, &mut player_goes_again, &stats);
 
         if enter_pressed_in_second_play {
             change_current_player(&mut whos_turn);
@@ -167,7 +167,7 @@ fn initialize_pieces(x: i8, y: i8) -> Tile {
 
 fn input_full_coords(
     whos_turn: &PlayerTurn,
-    player_goes_again: bool,
+    player_goes_again: &mut bool,
     stats: &HashMap<(i8, i8), Tile>,
 ) -> (((i8, i8), (i8, i8)), bool, bool) {
     let mut full_move_action: Vec<char> = Vec::new();
@@ -197,6 +197,7 @@ fn input_full_coords(
             Some(v) => {
                 if *v == 'x' {
                     println!("log: char x received");
+                    *player_goes_again = false;
                     return (((0, 0), (0, 0)), false, true);
                 }
             }
@@ -245,12 +246,12 @@ for v in second_output_of_chars.iter() {
 }
 fn input_single_coords(
     first_or_second: u8,
-    player_goes_again: bool,
+    player_goes_again: &mut bool,
     whos_turn: &PlayerTurn,
     stats: &HashMap<(i8, i8), Tile>,
 ) -> Vec<char> {
     'outer: loop {
-        if player_goes_again {
+        if *player_goes_again {
             print!(
                 "{} goes again. Press \"enter\" without arguments to end turn.",
                 if matches![whos_turn, PlayerTurn::P1] {
@@ -277,7 +278,7 @@ fn input_single_coords(
         ioflush();
         let input = user_input();
         println!("single user input {:?}", input);
-        if player_goes_again {
+        if *player_goes_again {
             match &input[..] {
                 // messy code
                 "" | "end" => {
