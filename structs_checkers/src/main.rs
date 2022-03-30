@@ -34,7 +34,8 @@ enum PlayerTurn {
 }
 
 fn main() {
-    // Introduction() stores the menu system before beginning the game.
+    // Introduction() stores the menu system that runs before beginning
+    // the game.
     introduction();
 
     clear();
@@ -60,48 +61,56 @@ fn main() {
     loop {
         clear();
         print_board(&stats);
-        //
+        // input_full_coords() manages user input and returns 
+        // the first and second coordinates, whether 'enter' was 
+        // pressed without any arguments after capturing one piece, 
+        // and whether the user entered 'esc' after entering the 
+        // first coordinate input.
         let (full_move_argument, enter_pressed_in_second_play, escape_current_entry) =
             input_full_coords(&whos_turn,&mut player_goes_again, &stats);
 
+        // if true, end turn and go to next player.
         if enter_pressed_in_second_play {
             change_current_player(&mut whos_turn);
             player_goes_again = false;
             continue;
         }
 
+        // if true, restart the player's turn... (might rem feature...?),
+        // difficult to implement. 
         if escape_current_entry {
             player_goes_again = true;
             continue;
         }
 
-        //println!("full move argument: {:?}", full_move_argument); //debug
+        //println!("log: full move argument: {:?}", full_move_argument); //debug
 
-        // logic: check if first coord belongs to P1, then if the
-        // destination is a valid movement (also consider double).
+        // logic_check performs a bunch of tests on the coordinates
+        // inputted to see if the action suggested is possible. If
+        // yes, return true, else false. 
         let valid = logic_check(&whos_turn, &full_move_argument, &stats);
         //println!("logic_check: {:?}", valid); //debug
 
         //print_board(&stats);
 
+        // if logic_check returned false, then ask the player to
+        // re-input coordinates. 
         if !valid {
             println!("invalid input, please try again.");
             continue;
         }
 
+        // if logic_check() returned true, "move" the appropriate pieces
+        // using logic_move(). This is done by changing the data in 
+        // HashMap "stats".
+        // logic_move() will return whether the player should go again,
+        // in the instance that the player captured an enemy piece. 
         player_goes_again = logic_move(&whos_turn, &full_move_argument, &mut stats);
         if player_goes_again {
             continue;
         } else {
             player_goes_again = false;
         }
-        // now, make it so if player_goes_again is true, player
-        // gets to go again. perhaps declare as mutable at the
-        // top, so can start at the top of loop, and print line
-        // if player gets to go again, and allow the option for
-        // the user to skip by entering without arguments. Maybe
-        // make this action always available...? Actually, maybe
-        // that wont work... check rules for checkers...
 
         change_current_player(&mut whos_turn);
     }
