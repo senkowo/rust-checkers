@@ -79,7 +79,7 @@ fn main() {
         // if true, restart the player's turn... (might rem feature...?),
         // difficult to implement. 
         if escape_current_entry {
-            player_goes_again = true;
+            player_goes_again = false;
             continue;
         }
 
@@ -96,11 +96,14 @@ fn main() {
         // if logic_check returned false, then ask the player to
         // re-input coordinates. 
         if !valid {
-            println!("invalid input, please try again.");
+            println!("-------------------------------------------");
+            println!("|=> Error: invalid input, please try again.");
+            println!("-------------------------------------------");
+            sleep(1);
             continue;
         }
 
-        // if logic_check() returned true, "move" the appropriate pieces
+        // if logic_check() returned true, move the appropriate pieces
         // using logic_move(). This is done by changing the data in 
         // HashMap "stats".
         // logic_move() will return whether the player should go again,
@@ -335,9 +338,9 @@ fn input_single_coords(
                 "Player 2"
             },
             if first_or_second == 1 {
-                "Input piece location or full move argument: "
+                "Enter initial and final Coordinates\n\t(e.g. [x, y] : \"12:enter:23\" or \"1223\"): "
             } else {
-                "Input move location: "
+                "Input destination coordinate\n\t(e.g. \"23\") (Note: enter \"esc\" to cancel): "
             }
         );
         ioflush();
@@ -347,8 +350,6 @@ fn input_single_coords(
             match &input[..] {
                 // messy code
                 "" | "end" => {
-                    println!("log: e is being returned from single input");
-                    sleep(2);
                     return vec!['e'];
                 }
                 _ => {}
@@ -358,8 +359,6 @@ fn input_single_coords(
         if first_or_second == 2 {
             match &input[..] {
                 "esc" => {
-                    println!("log: detect esc, return 'x' ");
-                    sleep(2);
                     return vec!['x'];
                 }
                 _ => {}
@@ -389,14 +388,14 @@ fn input_single_coords(
                 if (output_as_chars.len() == 2) || (output_as_chars.len() == 4) {
                     return output_as_chars;
                 } else {
-                    println!("incorrect input; can only be 2 or 4 numbers.");
+                    println!("|=> Error: incorrect input; can only be 2 or 4 numbers.");
                 }
             }
             2 => {
                 if output_as_chars.len() == 2 {
                     return output_as_chars;
                 } else {
-                    println!("incorrent input; can only be 2 numbers.");
+                    println!("|=> Error: incorrent input; can only be 2 numbers.");
                 }
             }
             _ => println!("error at first_or_second"),
