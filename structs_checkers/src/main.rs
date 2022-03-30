@@ -127,15 +127,19 @@ fn introduction() {
         ioflush();
         let uwu = user_input();
         match &uwu[..] {
+            // if input (uwu) is "" or "s" or "start", exit introduction()
+            // and initialize game. 
             "" | "s" | "start" => break,
+            // if else, fetch info to print for commands from intro_help().
             _ => intro_help(&uwu),
         }
     }
 }
+// info to print for certain commands inputted. 
 fn intro_help(input: &str) {
     clear();
     match input {
-        "" | "s" | "start" => {}, // it should never pass through here
+        "" | "s" | "start" => panic!("it should never pass through here"),
         "m" | "menu" => println!(
             "{}{}{}{}{}{}{}{}{}{}",
             "\n\n\n\tcli-checkers\n\n\n",
@@ -196,6 +200,8 @@ fn intro_help(input: &str) {
     }
 }
 
+// Assists in initializing the HashMap "stats" when starting the game.
+// Almost like putting all the Checkers pieces in the default starting place. 
 fn initialize_pieces(x: i8, y: i8) -> Tile {
     if ((x + (y % 2)) % 2) == 1 {
         match y {
@@ -220,6 +226,10 @@ fn initialize_pieces(x: i8, y: i8) -> Tile {
     }
 }
 
+// manages user input for coordinates. 
+// fn returns the full coordinates: ((x, y), (x, y)) 
+// fn also returns whether the player should go again and whether
+// the user cancelled the second input sequence using "esc".
 fn input_full_coords(
     whos_turn: &PlayerTurn,
     player_goes_again: &mut bool,
