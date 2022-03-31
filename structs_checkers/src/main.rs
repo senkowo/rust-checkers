@@ -155,7 +155,7 @@ fn intro_help(input: &str) {
             "\tEnter \"c\" or \"commands\" to list all commands\n",
             "\tEnter \"h\" or \"help\" for game instructions\n",
             "\tEnter \"i\" or \"info\" for information about the project\n",
-            "\tEnter \"OwO\" for secret\n\n\n",
+            "\tEnter \"OwO\" or \"owo\" for secret\n\n\n",
             "\t<insert ascii art here>\n\n\n\n",
             "\tPress enter key to begin"
         ),
@@ -167,7 +167,7 @@ fn intro_help(input: &str) {
             "\t\"c\" | \"commands\"\n",
             "\t\"h\" | \"help\"\n",
             "\t\"i\" | \"info\"\n",
-            "\t\"OwO\""
+            "\t\"OwO\" | \"owo\""
         ),
         "h" | "help" => println!(
             "{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}",
@@ -183,8 +183,8 @@ fn intro_help(input: &str) {
             "\tto (2, 3).\n\n",
             "\tIf you were to type ",
             "\tSpaces and letters are not read when entering coordinates, so\n",
-            "\tyou can even do \"e 6 2 1 - 0\" and this will be read as\n",
-            "\t(6, 2) => (1, 0). These are not realistically possible\n",
+            "\tyou can even do \"e621 :3\" and this will be read as\n",
+            "\t(6, 2) => (1, 3). These are not realistically possible\n",
             "\tmovements to perform, however.\n\n",
             "\tLike ordinary Checkers, your piece will gain the ability to\n",
             "\tmove backwards once you reach the other side of the board.\n",
