@@ -1,6 +1,4 @@
-// for deleting items/taking ownership from hashmap:
-// https://stackoverflow.com/questions/43416196/return-exact-value-in-rust-hashmap
-//
+// 
 
 use std::collections::HashMap;
 use std::convert::TryInto;
@@ -327,7 +325,7 @@ fn input_single_coords(
         if *player_goes_again {
             print!(
                 "{} goes again. Press \"enter\" without arguments to end turn.",
-                if whos_turn == PlayerTurn::P1 {
+                if *whos_turn == PlayerTurn::P1 {
                     "Player 1"
                 } else {
                     "Player 2"
@@ -337,7 +335,7 @@ fn input_single_coords(
         ioflush();
         print!(
             "\n{}: {}",
-            if whos_turn == PlayerTurn::P1 {
+            if *whos_turn == PlayerTurn::P1 {
                 "Player 1"
             } else {
                 "Player 2"
@@ -510,12 +508,12 @@ fn logic_check(
         match stats.get(&((a + c) / 2, (b + d) / 2)).unwrap().state {
             Occupancy::Emp => return false,
             Occupancy::P1 => {
-                if whos_turn == PlayerTurn::P1 {
+                if *whos_turn == PlayerTurn::P1 {
                     return false;
                 }
             }
             Occupancy::P2 => {
-                if whos_turn == PlayerTurn::P2 {
+                if *whos_turn == PlayerTurn::P2 {
                     return false;
                 }
             }
@@ -581,7 +579,7 @@ fn check_if_promote_to_king(
 ) {
     let mut players_piece;
     let mut i0_or_7;
-    if whos_turn == PlayerTurn::P1 {
+    if *whos_turn == PlayerTurn::P1 {
         players_piece = Occupancy::P1;
         i0_or_7 = 7;
     } else { // PlayerTurn::P2
@@ -675,7 +673,7 @@ fn user_input() -> String {
     ret
 }
 fn change_current_player(whos_turn: &mut PlayerTurn) {
-    if whos_turn == PlayerTurn::P1 {
+    if *whos_turn == PlayerTurn::P1 {
         *whos_turn = PlayerTurn::P2;
     } else {
         *whos_turn = PlayerTurn::P1;
