@@ -111,6 +111,7 @@ fn main() {
         player_goes_again = logic_move(&whos_turn, &full_move_argument, &mut stats);
 
         // check if need to promote to king, and update "stats"
+        check_if_promote_to_king(&mut stats, &whos_turn);
        
         
         if player_goes_again {
@@ -574,28 +575,32 @@ fn logic_move(
     }
 }
 
-fn check_if_promote_to_king(stats: &mut HashMap<(i8, i8), Tile>, whos_turn: &PlayerTurn) {
-    let players_piece = if whos_turn == PlayerTurn::P1 {
-        Occupancy::P1
+fn check_if_promote_to_king(
+    stats: &mut HashMap<(i8, i8),
+    Tile>, whos_turn: &PlayerTurn
+) {
+    let mut players_piece;
+    let mut i0_or_7;
+    println!("{}")
+    if matches![*whos_turn, PlayerTurn::P1] {
+        players_piece = Occupancy::P2;
+        i0_or_7 = 7;
     } else { // PlayerTurn::P2
-        Occupancy::P2
+        players_piece = Occupancy::P1;
+        i0_or_7 = 0;
     }
-    let mut i0_or_7 = 0;
-    for _ in 0..2 {
-        for x in 0..8 {
-            if stats.get(&(i0_or_7, x)).unwrap().state == players_piece {
-                if stats.get(&(i0_or_7, x)).unwrap().level == Level::Single {
-                    stats.insert(
-                        (i0_or_7, x),
-                        Tile {
-                            state: players_piece,
-                            level: Level::Double,
-                        }
-                    )
-                }
+    for x in 0..8 {
+        if matches![stats.get(&(x, i0_or_7)).unwrap().state, players_piece] {
+            if matches![stats.get(&(x, i0_or_7)).unwrap().level, Level::Single] {
+                stats.insert(
+                    (x, i0_or_7),
+                    Tile {
+                        state: players_piece,
+                        level: Level::Double,
+                    }
+                );
             }
         }
-        i0_or_y = 7;
     }
 }
 
