@@ -110,7 +110,13 @@ fn main() {
 
         // check if need to promote to king, and update "stats"
         check_if_promote_to_king(&mut stats, &whos_turn);
-       
+
+        // check if all the pieces of either player is zero, and if so,
+        // end the game. 
+        if check_if_game_over(&stats) {
+            println!("Game Over!");
+            break;
+        }
         
         if player_goes_again {
             continue;
@@ -581,8 +587,8 @@ fn logic_move(
 }
 
 fn check_if_promote_to_king(
-    stats: &mut HashMap<(i8, i8),
-    Tile>, whos_turn: &PlayerTurn
+    stats: &mut HashMap<(i8, i8), Tile>,
+    whos_turn: &PlayerTurn
 ) {
     let mut players_piece;
     let mut i0_or_7;
@@ -606,6 +612,19 @@ fn check_if_promote_to_king(
             }
         }
     }
+}
+
+fn check_if_game_over(stats: &HashMap<(i8, i8), Tile>) -> bool {
+    for y in 0..8 {
+        for x in 0..8 {
+            match stats.get(&(x, y)).unwrap().state {
+                Occupancy::P1 => return false,
+                Occupancy::P2 => return false, 
+                Occupancy::Emp => {},
+            }
+        }
+    }
+    true
 }
 
 fn print_board(stats: &HashMap<(i8, i8), Tile>) {
