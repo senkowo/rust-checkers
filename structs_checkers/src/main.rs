@@ -245,18 +245,19 @@ fn input_full_coords(
 
     let first_output_of_chars: Vec<char> =
         input_single_coords(1, player_goes_again, &whos_turn, &stats);
-    //println!("log: first_output_of_chars?: {:#?}", first_output_of_chars);
     match first_output_of_chars.get(0) {
         Some(v) => {
             if *v == 'e' {
-                println!("log: char e received");
                 return (((0, 0), (0, 0)), true, false);
+            }
+            if *v == 'o' {
+                return (((0, 0), (0, 0)), false, true);
             }
         }
         None => {} // convoluted, but it works
                    // true, false means that blank enter was pressed...
     }
-        for v in first_output_of_chars.iter() {
+    for v in first_output_of_chars.iter() {
         full_move_action.push(*v);
     }
 
@@ -267,8 +268,10 @@ fn input_full_coords(
         match second_output_of_chars.get(0) {
             Some(v) => {
                 if *v == 'x' {
-                    println!("log: char x received");
                     *player_goes_again = false;
+                    return (((0, 0), (0, 0)), false, true);
+                }
+                if *v == 'o' {
                     return (((0, 0), (0, 0)), false, true);
                 }
             }
@@ -348,7 +351,6 @@ fn input_single_coords(
         );
         ioflush();
         let input = user_input();
-        //println!("single user input {:?}", input);
         if *player_goes_again {
             match &input[..] {
                 // messy code
@@ -357,8 +359,11 @@ fn input_single_coords(
                 }
                 _ => {}
             }
+        // in the case of entering with no input, return special char 'o' to reset.
         } else if &input[..] == "" {
-            return vec!['0'];
+            println!("will return");
+            sleep(1);
+            return vec!['o'];
         }
         //println!("is it first or second: {:?}", first_or_second);
         if first_or_second == 2 {
