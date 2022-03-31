@@ -274,7 +274,7 @@ fn input_full_coords(
             }
             None => {}
         }
-for v in second_output_of_chars.iter() {
+        for v in second_output_of_chars.iter() {
             full_move_action.push(*v);
         }
     }
@@ -357,6 +357,8 @@ fn input_single_coords(
                 }
                 _ => {}
             }
+        } else if &input[..] == "" {
+            return vec!['0'];
         }
         //println!("is it first or second: {:?}", first_or_second);
         if first_or_second == 2 {
