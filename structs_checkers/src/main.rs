@@ -13,21 +13,21 @@ struct Tile {
     level: Level,
 }
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, PartialEq)]
 enum Occupancy {
     Emp,
     P1,
     P2,
 }
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, PartialEq)]
 enum Level {
     Emp,
     Single,
     Double,
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 enum PlayerTurn {
     P1,
     P2,
@@ -337,7 +337,7 @@ fn input_single_coords(
         ioflush();
         print!(
             "\n{}: {}",
-            if matches![whos_turn, PlayerTurn::P1] {
+            if whos_turn == PlayerTurn::P1 {
                 "Player 1"
             } else {
                 "Player 2"
@@ -420,9 +420,9 @@ fn logic_check(
     // and if the second coordinate is empty.
     match whos_turn {
         &PlayerTurn::P1 => {
-            if matches![stats.get(&(*a, *b)).unwrap().state, Occupancy::P1] {
+            if stats.get(&(*a, *b)).unwrap().state == Occupancy::P1 {
                 //println!("coord 1 is correct"); //debug
-                if matches![stats.get(&(*c, *d)).unwrap().state, Occupancy::Emp] {
+                if stats.get(&(*c, *d)).unwrap().state == Occupancy::Emp {
                     //println!("coord 2 is correct"); //debug
                 } else {
                     return false;
@@ -432,9 +432,9 @@ fn logic_check(
             }
         }
         &PlayerTurn::P2 => {
-            if matches![stats.get(&(*a, *b)).unwrap().state, Occupancy::P2] {
+            if stats.get(&(*a, *b)).unwrap().state == Occupancy::P2 {
                 //println!("coord 1 is correct"); //debug
-                if matches![stats.get(&(*c, *d)).unwrap().state, Occupancy::Emp] {
+                if stats.get(&(*c, *d)).unwrap().state == Occupancy::Emp {
                     //println!("coord 2 is correct"); //debug
                 } else {
                     return false;
@@ -581,17 +581,23 @@ fn check_if_promote_to_king(
 ) {
     let mut players_piece;
     let mut i0_or_7;
-    println!("{}")
-    if matches![*whos_turn, PlayerTurn::P1] {
-        players_piece = Occupancy::P2;
+    if matches![whos_turn, PlayerTurn::P1] {
+        players_piece = Occupancy::P1;
         i0_or_7 = 7;
     } else { // PlayerTurn::P2
-        players_piece = Occupancy::P1;
+        players_piece = Occupancy::P2;
         i0_or_7 = 0;
     }
     for x in 0..8 {
-        if matches![stats.get(&(x, i0_or_7)).unwrap().state, players_piece] {
-            if matches![stats.get(&(x, i0_or_7)).unwrap().level, Level::Single] {
+        println!(
+            "{:#?} ~ {:#?} ~ {:#?}",
+            stats.get(&(x, i0_or_7)).unwrap().state == players_piece,
+            stats.get(&(x, i0_or_7)).unwrap().state,
+            players_piece,
+        );
+        sleep(1);
+        if stats.get(&(x, i0_or_7)).unwrap().state == players_piece {
+            if stats.get(&(x, i0_or_7)).unwrap().level == Level::Single {
                 stats.insert(
                     (x, i0_or_7),
                     Tile {
@@ -669,7 +675,7 @@ fn user_input() -> String {
     ret
 }
 fn change_current_player(whos_turn: &mut PlayerTurn) {
-    if matches![whos_turn, PlayerTurn::P1] {
+    if whos_turn == PlayerTurn::P1 {
         *whos_turn = PlayerTurn::P2;
     } else {
         *whos_turn = PlayerTurn::P1;
