@@ -587,13 +587,6 @@ fn check_if_promote_to_king(
         i0_or_7 = 0;
     }
     for x in 0..8 {
-        println!(
-            "{:#?} ~ {:#?} ~ {:#?}",
-            stats.get(&(x, i0_or_7)).unwrap().state == players_piece,
-            stats.get(&(x, i0_or_7)).unwrap().state,
-            players_piece,
-        );
-        sleep(1);
         if stats.get(&(x, i0_or_7)).unwrap().state == players_piece {
             if stats.get(&(x, i0_or_7)).unwrap().level == Level::Single {
                 stats.insert(
@@ -632,11 +625,19 @@ fn print_board(stats: &HashMap<(i8, i8), Tile>) {
                                 ioflush();
                             }
                             Occupancy::P1 => {
-                                print!(" 0000 |");
+                                match v.level {
+                                    Level::Single => print!(" OOOO |"),
+                                    Level::Double => print!(" 0KK0 |"),
+                                    Level::Emp => panic!("Error: this shouldn't happen"),
+                                }
                                 ioflush();
                             }
                             Occupancy::P2 => {
-                                print!(" //// |");
+                                match v.level {
+                                    Level::Single => print!(" //// |"),
+                                    Level::Double => print!(" \\KK\\ |"),
+                                    Level::Emp => panic!("Error: this shouldn't happen"),
+                                }
                                 ioflush();
                             }
                         }
