@@ -109,6 +109,10 @@ fn main() {
         // logic_move() will return whether the player should go again,
         // in the instance that the player captured an enemy piece. 
         player_goes_again = logic_move(&whos_turn, &full_move_argument, &mut stats);
+
+        // check if need to promote to king, and update "stats"
+       
+        
         if player_goes_again {
             continue;
         } else {
@@ -567,6 +571,31 @@ fn logic_move(
         // return false. The function return goes into variable
         // "player_goes_again: bool".
         _ => false,
+    }
+}
+
+fn check_if_promote_to_king(stats: &mut HashMap<(i8, i8), Tile>, whos_turn: &PlayerTurn) {
+    let players_piece = if whos_turn == PlayerTurn::P1 {
+        Occupancy::P1
+    } else { // PlayerTurn::P2
+        Occupancy::P2
+    }
+    let mut i0_or_7 = 0;
+    for _ in 0..2 {
+        for x in 0..8 {
+            if stats.get(&(i0_or_7, x)).unwrap().state == players_piece {
+                if stats.get(&(i0_or_7, x)).unwrap().level == Level::Single {
+                    stats.insert(
+                        (i0_or_7, x),
+                        Tile {
+                            state: players_piece,
+                            level: Level::Double,
+                        }
+                    )
+                }
+            }
+        }
+        i0_or_y = 7;
     }
 }
 
