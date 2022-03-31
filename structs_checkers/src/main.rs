@@ -176,7 +176,7 @@ fn intro_help(input: &str) {
             "\t\"OwO\" | \"owo\""
         ),
         "h" | "help" => println!(
-            "{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}",
+            "{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}",
             "\n\n\tWelcome to cli-checkers!\n\n",
             "\tThis is a two-player game where the objective is to capture\n",
             "\tall of the opponent's pieces.\n\n",
@@ -184,14 +184,16 @@ fn intro_help(input: &str) {
             "\tthe piece you wish to move; then, the destination coordinates.\n",
             "\tThere are several ways to enter coordinates:\n\n", 
             "\t\t\"12\" :enter: \"23\"\n",
-            "\t\t\"1223\"\n\n",
+            "\t\t\"1223\" :enter:\n\n",
             "\tBoth of the examples given moves a piece at coordinates (1, 2)\n",
             "\tto (2, 3).\n\n",
-            "\tIf you were to type ",
             "\tSpaces and letters are not read when entering coordinates, so\n",
             "\tyou can even do \"e621 :3\" and this will be read as\n",
             "\t(6, 2) => (1, 3). These are not realistically possible\n",
             "\tmovements to perform, however.\n\n",
+            "\tIf you entered the initial coordinate but wish to change it to\n",
+            "\tanother piece, you can enter \"esc\" to go back to the\n",
+            "\tprevious input prompt.\n\n",
             "\tLike ordinary Checkers, your piece will gain the ability to\n",
             "\tmove backwards once you reach the other side of the board.\n",
             "\t"
@@ -206,8 +208,7 @@ fn intro_help(input: &str) {
         ),
         _ => println!(
             "\n\n\n\nCommand not found: \"{}\"\n{}",
-            input,
-            "See the list of available commands: \"c\" | \"commands\""
+            input, "See the list of available commands: \"c\" | \"commands\""
         ),
     }
 }
@@ -586,10 +587,7 @@ fn logic_move(
     }
 }
 
-fn check_if_promote_to_king(
-    stats: &mut HashMap<(i8, i8), Tile>,
-    whos_turn: &PlayerTurn
-) {
+fn check_if_promote_to_king(stats: &mut HashMap<(i8, i8), Tile>, whos_turn: &PlayerTurn) {
     let mut players_piece;
     let mut i0_or_7;
     if *whos_turn == PlayerTurn::P1 {
@@ -607,7 +605,7 @@ fn check_if_promote_to_king(
                     Tile {
                         state: players_piece,
                         level: Level::Double,
-                    }
+                    },
                 );
             }
         }
@@ -620,7 +618,7 @@ fn check_if_game_over(stats: &HashMap<(i8, i8), Tile>) -> bool {
             match stats.get(&(x, y)).unwrap().state {
                 Occupancy::P1 => return false,
                 Occupancy::P2 => return false, 
-                Occupancy::Emp => {},
+                Occupancy::Emp => {}
             }
         }
     }
