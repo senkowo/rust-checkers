@@ -327,7 +327,7 @@ fn input_single_coords(
         if *player_goes_again {
             print!(
                 "{} goes again. Press \"enter\" without arguments to end turn.",
-                if matches![whos_turn, PlayerTurn::P1] {
+                if whos_turn == PlayerTurn::P1 {
                     "Player 1"
                 } else {
                     "Player 2"
@@ -510,12 +510,12 @@ fn logic_check(
         match stats.get(&((a + c) / 2, (b + d) / 2)).unwrap().state {
             Occupancy::Emp => return false,
             Occupancy::P1 => {
-                if matches![whos_turn, PlayerTurn::P1] {
+                if whos_turn == PlayerTurn::P1 {
                     return false;
                 }
             }
             Occupancy::P2 => {
-                if matches![whos_turn, PlayerTurn::P2] {
+                if whos_turn == PlayerTurn::P2 {
                     return false;
                 }
             }
@@ -581,7 +581,7 @@ fn check_if_promote_to_king(
 ) {
     let mut players_piece;
     let mut i0_or_7;
-    if matches![whos_turn, PlayerTurn::P1] {
+    if whos_turn == PlayerTurn::P1 {
         players_piece = Occupancy::P1;
         i0_or_7 = 7;
     } else { // PlayerTurn::P2
