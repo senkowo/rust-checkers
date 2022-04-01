@@ -353,7 +353,7 @@ fn input_single_coords(
     'outer: loop {
         if *player_goes_again {
             print!(
-                "{} goes again. Press \"enter\" without arguments to end turn.",
+                "\n{} goes again. Press \"enter\" without arguments to end turn.",
                 if *whos_turn == PlayerTurn::P1 {
                     "Player 1"
                 } else {
