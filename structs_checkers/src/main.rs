@@ -130,8 +130,26 @@ fn main() {
 
 fn introduction() {
     clear();
-    println!("\n\n<Insert Introduction/Spash Screen>");
-    sleep(1);
+    println!(
+        // random ascii art
+        "\n\n{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}",
+        "\t⡆⣐⢕⢕⢕⢕⢕⢕⢕⢕⠅⢗⢕⢕⢕⢕⢕⢕⢕⠕⠕⢕⢕⢕⢕⢕⢕⢕⢕⢕\n",
+        "\t⢐⢕⢕⢕⢕⢕⣕⢕⢕⠕⠁⢕⢕⢕⢕⢕⢕⢕⢕⠅⡄⢕⢕⢕⢕⢕⢕⢕⢕⢕\n",
+        "\t⢕⢕⢕⢕⢕⠅⢗⢕⠕⣠⠄⣗⢕⢕⠕⢕⢕⢕⠕⢠⣿⠐⢕⢕⢕⠑⢕⢕⠵⢕\n",
+        "\t⢕⢕⢕⢕⠁⢜⠕⢁⣴⣿⡇⢓⢕⢵⢐⢕⢕⠕⢁⣾⢿⣧⠑⢕⢕⠄⢑⢕⠅⢕\n",
+        "\t⢕⢕⠵⢁⠔⢁⣤⣤⣶⣶⣶⡐⣕⢽⠐⢕⠕⣡⣾⣶⣶⣶⣤⡁⢓⢕⠄⢑⢅⢑\n",
+        "\t⠍⣧⠄⣶⣾⣿⣿⣿⣿⣿⣿⣷⣔⢕⢄⢡⣾⣿⣿⣿⣿⣿⣿⣿⣦⡑⢕⢤⠱⢐\n",
+        "\t⢠⢕⠅⣾⣿⠋⢿⣿⣿⣿⠉⣿⣿⣷⣦⣶⣽⣿⣿⠈⣿⣿⣿⣿⠏⢹⣷⣷⡅⢐\n",
+        "\t⣔⢕⢥⢻⣿⡀⠈⠛⠛⠁⢠⣿⣿⣿⣿⣿⣿⣿⣿⡀⠈⠛⠛⠁⠄⣼⣿⣿⡇⢔\n",
+        "\t⢕⢕⢽⢸⢟⢟⢖⢖⢤⣶⡟⢻⣿⡿⠻⣿⣿⡟⢀⣿⣦⢤⢤⢔⢞⢿⢿⣿⠁⢕\n",
+        "\t⢕⢕⠅⣐⢕⢕⢕⢕⢕⣿⣿⡄⠛⢀⣦⠈⠛⢁⣼⣿⢗⢕⢕⢕⢕⢕⢕⡏⣘⢕\n",
+        "\t⢕⢕⠅⢓⣕⣕⣕⣕⣵⣿⣿⣿⣾⣿⣿⣿⣿⣿⣿⣿⣷⣕⢕⢕⢕⢕⡵⢀⢕⢕\n",
+        "\t⢑⢕⠃⡈⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⢃⢕⢕⢕\n",
+        "\t⣆⢕⠄⢱⣄⠛⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠿⢁⢕⢕⠕⢁\n",
+        "\t⣿⣦⡀⣿⣿⣷⣶⣬⣍⣛⣛⣛⡛⠿⠿⠿⠛⠛⢛⣛⣉⣭⣤⣂⢜⠕⢑⣡⣴⣿\n",
+        "\n\n\t\tBooting up..."
+    );
+    sleep(2);
     clear();
     intro_help("menu");
     loop {
@@ -176,8 +194,9 @@ fn intro_help(input: &str) {
             "\t\"OwO\" | \"owo\""
         ),
         "h" | "help" => println!(
-            "{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}",
+            "{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}",
             "\n\n\tWelcome to cli-checkers!\n\n",
+            "\tOwO what's this?\n",
             "\tThis is a two-player game where the objective is to capture\n",
             "\tall of the opponent's pieces.\n\n",
             "\tWhen performing a move, you first enter the coordinates of\n",
@@ -368,8 +387,6 @@ fn input_single_coords(
             }
         // in the case of entering with no input, return special char 'o' to reset.
         } else if &input[..] == "" {
-            println!("will return");
-            sleep(1);
             return vec!['o'];
         }
         //println!("is it first or second: {:?}", first_or_second);
@@ -588,8 +605,8 @@ fn logic_move(
 }
 
 fn check_if_promote_to_king(stats: &mut HashMap<(i8, i8), Tile>, whos_turn: &PlayerTurn) {
-    let mut players_piece;
-    let mut i0_or_7;
+    let players_piece;
+    let i0_or_7;
     if *whos_turn == PlayerTurn::P1 {
         players_piece = Occupancy::P1;
         i0_or_7 = 7;
@@ -613,16 +630,23 @@ fn check_if_promote_to_king(stats: &mut HashMap<(i8, i8), Tile>, whos_turn: &Pla
 }
 
 fn check_if_game_over(stats: &HashMap<(i8, i8), Tile>) -> bool {
+    let mut player1s = true;
+    let mut player2s = true;
     for y in 0..8 {
         for x in 0..8 {
             match stats.get(&(x, y)).unwrap().state {
-                Occupancy::P1 => return false,
-                Occupancy::P2 => return false, 
+                Occupancy::P1 => player1s = false,
+                Occupancy::P2 => player2s = false, 
                 Occupancy::Emp => {}
             }
         }
     }
-    true
+    // if either remains true, return yes:end game
+    if player1s == true || player2s == true {
+        true
+    } else {
+        false
+    }
 }
 
 fn print_board(stats: &HashMap<(i8, i8), Tile>) {
