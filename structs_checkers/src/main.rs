@@ -194,7 +194,7 @@ fn intro_help(input: &str) {
             "\t\"OwO\" | \"owo\""
         ),
         "h" | "help" => println!(
-            "{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}",
+            "{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}",
             "\n\n\tWelcome to cli-checkers!\n\n",
             "\tOwO what's this?\n",
             "\tThis is a two-player game where the objective is to capture\n",
@@ -202,7 +202,7 @@ fn intro_help(input: &str) {
             "\tWhen performing a move, you first enter the coordinates of\n",
             "\tthe piece you wish to move; then, the destination coordinates.\n",
             "\tThere are several ways to enter coordinates:\n\n", 
-            "\t\t\"12\" :enter: \"23\"\n",
+            "\t\t\"12\" :enter: \"23\" :enter:\n",
             "\t\t\"1223\" :enter:\n\n",
             "\tBoth of the examples given moves a piece at coordinates (1, 2)\n",
             "\tto (2, 3).\n\n",
@@ -210,17 +210,29 @@ fn intro_help(input: &str) {
             "\tyou can even do \"e621 :3\" and this will be read as\n",
             "\t(6, 2) => (1, 3). These are not realistically possible\n",
             "\tmovements to perform, however.\n\n",
-            "\tIf you entered the initial coordinate but wish to change it to\n",
-            "\tanother piece, you can enter \"esc\" to go back to the\n",
-            "\tprevious input prompt.\n\n",
+            "\tIf you entered the initial coordinate but wish to go back and\n",
+            "\tchange it, you can enter \"esc\" to go back to the previous\n",
+            "\tinput prompt.\n\n",
             "\tLike ordinary Checkers, your piece will gain the ability to\n",
-            "\tmove backwards once you reach the other side of the board.\n",
-            "\t"
+            "\tmove backwards once you reach the other side of the board.\n\n",
+            "\tOnce you capture an enemy piece, you will have the opportunity\n",
+            "\tto perform another action. If you wish not to, simply hit\n",
+            "\t:enter: with no arguments and your turn will end."
             
             
         ),
         "i" | "info" => println!(
-            ""
+            "{}{}{}{}{}{}{}{}{}{}",
+            "\n\n\n\tI apologize for the following:\n\n",
+            "\tHewwo~ Dis is a simpwe pwoject I made in Wust (Rust).\n",
+            "\tI am stiww a beginnew in Wust (Rust) so it's nyot the\n",
+            "\tpwettiest piece of code, but I weawned a wot from dis!\n",
+            "\tWeawning Wust came at the cost of becoming a femboy fuwwy,\n",
+            "\tbut I came to weawwy wuv Wust!!\n",
+            "\tIt's onwy a mattew of time untiw I get mysewf a paiw of\n",
+            "\tPwogwamming Socks: a must nyeed for aww pwogwammews!\n",
+            "\tI don't knyow why I am wwiting dis in my AP Pewfowmance\n",
+            "\tTask, but I wondew what the AP Gwadews wiww think of dis!\n",
         ),
         "OwO" | "owo" | "Owo" => println!(
             "\nUwU"
