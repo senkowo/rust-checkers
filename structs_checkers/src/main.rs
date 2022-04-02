@@ -237,14 +237,14 @@ fn intro_help(input: &str) {
         "i" | "info" => println!(
             "{}{}{}{}{}{}{}{}{}{}",
             "\n\n\n\tI apologize for the following:\n\n",
-            "\tHewwo~ Dis is a simpwe pwoject I made in Wust (Rust).\n",
-            "\tI am stiww a beginnew in Wust (Rust) so it's nyot the\n",
-            "\tpwettiest piece of code, but I weawned a wot from dis!\n",
-            "\tWeawning Wust came at the cost of becoming a femboy fuwwy,\n",
+            "\thewwo~ dis is a simpwe pwoject I made in Wust (Rust).\n",
+            "\ti am stiww a beginnew in Wust (Rust) so it's nyot the\n",
+            "\tpwettiest piece of code, but I weawned a wot fwom dis!\n",
+            "\tweawning Wust came at the cost of becoming a femboy fuwwy,\n",
             "\tbut I came to weawwy wuv Wust!!\n",
-            "\tIt's onwy a mattew of time untiw I get mysewf a paiw of\n",
+            "\tit's onwy a mattew of time untiw I get mysewf a paiw of\n",
             "\tPwogwamming Socks: a must nyeed for aww pwogwammews!\n",
-            "\tI don't knyow why I am wwiting dis in my AP Pewfowmance\n",
+            "\ti don't knyow why i am wwiting dis in my AP Pewfowmance\n",
             "\tTask, but I wondew what the AP Gwadews wiww think of dis!\n",
         ),
         "OwO" | "owo" | "Owo" => println!("\nUwU"),
@@ -393,13 +393,18 @@ fn input_single_coords(
                 "Player 2"
             },
             if first_or_second == 1 {
-                "Enter initial and final Coordinates\n\t(e.g. [x, y] : \"12:enter:23\" or \"1223\"): "
+                "Enter move coordinates\n\t(e.g. [x, y] : \"12:enter:23\" or \"1223\"): "
             } else {
                 "Input destination coordinate\n\t(e.g. \"23\") (Note: enter \"esc\" to cancel): "
             }
         );
         ioflush();
         let input = user_input();
+
+        if input == "exit" {
+            panic!("exit command used, crashed program");
+        }
+
         if *player_goes_again {
             match &input[..] {
                 // messy code
