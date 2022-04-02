@@ -1,4 +1,4 @@
-// 
+//
 
 use std::collections::HashMap;
 use std::convert::TryInto;
@@ -59,13 +59,13 @@ fn main() {
     loop {
         clear();
         print_board(&stats);
-        // input_full_coords() manages user input and returns 
-        // the first and second coordinates, whether 'enter' was 
-        // pressed without any arguments after capturing one piece, 
-        // and whether the user entered 'esc' after entering the 
+        // input_full_coords() manages user input and returns
+        // the first and second coordinates, whether 'enter' was
+        // pressed without any arguments after capturing one piece,
+        // and whether the user entered 'esc' after entering the
         // first coordinate input.
         let (full_move_argument, enter_pressed_in_second_play, escape_current_entry) =
-            input_full_coords(&whos_turn,&mut player_goes_again, &stats);
+            input_full_coords(&whos_turn, &mut player_goes_again, &stats);
 
         // if true, end turn and go to next player.
         if enter_pressed_in_second_play {
@@ -75,7 +75,7 @@ fn main() {
         }
 
         // if true, restart the player's turn... (might rem feature...?),
-        // difficult to implement. 
+        // difficult to implement.
         if escape_current_entry {
             player_goes_again = false;
             continue;
@@ -85,14 +85,14 @@ fn main() {
 
         // logic_check performs a bunch of tests on the coordinates
         // inputted to see if the action suggested is possible. If
-        // yes, return true, else false. 
+        // yes, return true, else false.
         let valid = logic_check(&whos_turn, &full_move_argument, &stats);
         //println!("logic_check: {:?}", valid); //debug
 
         //print_board(&stats);
 
         // if logic_check returned false, then ask the player to
-        // re-input coordinates. 
+        // re-input coordinates.
         if !valid {
             println!("-------------------------------------------");
             println!("|=> Error: invalid input, please try again.");
@@ -102,22 +102,22 @@ fn main() {
         }
 
         // if logic_check() returned true, move the appropriate pieces
-        // using logic_move(). This is done by changing the data in 
+        // using logic_move(). This is done by changing the data in
         // HashMap "stats".
         // logic_move() will return whether the player should go again,
-        // in the instance that the player captured an enemy piece. 
+        // in the instance that the player captured an enemy piece.
         player_goes_again = logic_move(&whos_turn, &full_move_argument, &mut stats);
 
         // check if need to promote to king, and update "stats"
         check_if_promote_to_king(&mut stats, &whos_turn);
 
         // check if all the pieces of either player is zero, and if so,
-        // end the game. 
+        // end the game.
         if check_if_game_over(&stats) {
             println!("Game Over!");
             break;
         }
-        
+
         if player_goes_again {
             continue;
         } else {
@@ -130,24 +130,39 @@ fn main() {
 
 fn introduction() {
     clear();
-    println!(
-        // random ascii art
-        "\n\n{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}",
-        "\t⡆⣐⢕⢕⢕⢕⢕⢕⢕⢕⠅⢗⢕⢕⢕⢕⢕⢕⢕⠕⠕⢕⢕⢕⢕⢕⢕⢕⢕⢕\n",
-        "\t⢐⢕⢕⢕⢕⢕⣕⢕⢕⠕⠁⢕⢕⢕⢕⢕⢕⢕⢕⠅⡄⢕⢕⢕⢕⢕⢕⢕⢕⢕\n",
-        "\t⢕⢕⢕⢕⢕⠅⢗⢕⠕⣠⠄⣗⢕⢕⠕⢕⢕⢕⠕⢠⣿⠐⢕⢕⢕⠑⢕⢕⠵⢕\n",
-        "\t⢕⢕⢕⢕⠁⢜⠕⢁⣴⣿⡇⢓⢕⢵⢐⢕⢕⠕⢁⣾⢿⣧⠑⢕⢕⠄⢑⢕⠅⢕\n",
-        "\t⢕⢕⠵⢁⠔⢁⣤⣤⣶⣶⣶⡐⣕⢽⠐⢕⠕⣡⣾⣶⣶⣶⣤⡁⢓⢕⠄⢑⢅⢑\n",
-        "\t⠍⣧⠄⣶⣾⣿⣿⣿⣿⣿⣿⣷⣔⢕⢄⢡⣾⣿⣿⣿⣿⣿⣿⣿⣦⡑⢕⢤⠱⢐\n",
-        "\t⢠⢕⠅⣾⣿⠋⢿⣿⣿⣿⠉⣿⣿⣷⣦⣶⣽⣿⣿⠈⣿⣿⣿⣿⠏⢹⣷⣷⡅⢐\n",
-        "\t⣔⢕⢥⢻⣿⡀⠈⠛⠛⠁⢠⣿⣿⣿⣿⣿⣿⣿⣿⡀⠈⠛⠛⠁⠄⣼⣿⣿⡇⢔\n",
-        "\t⢕⢕⢽⢸⢟⢟⢖⢖⢤⣶⡟⢻⣿⡿⠻⣿⣿⡟⢀⣿⣦⢤⢤⢔⢞⢿⢿⣿⠁⢕\n",
-        "\t⢕⢕⠅⣐⢕⢕⢕⢕⢕⣿⣿⡄⠛⢀⣦⠈⠛⢁⣼⣿⢗⢕⢕⢕⢕⢕⢕⡏⣘⢕\n",
-        "\t⢕⢕⠅⢓⣕⣕⣕⣕⣵⣿⣿⣿⣾⣿⣿⣿⣿⣿⣿⣿⣷⣕⢕⢕⢕⢕⡵⢀⢕⢕\n",
-        "\t⢑⢕⠃⡈⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⢃⢕⢕⢕\n",
-        "\t⣆⢕⠄⢱⣄⠛⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠿⢁⢕⢕⠕⢁\n",
-        "\t⣿⣦⡀⣿⣿⣷⣶⣬⣍⣛⣛⣛⡛⠿⠿⠿⠛⠛⢛⣛⣉⣭⣤⣂⢜⠕⢑⣡⣴⣿\n",
-        "\n\n\t\tBooting up..."
+    println!("{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}",
+        // Random ascii art
+"\n\n⣿⣿⣿⣿⣿⣿⡷⣯⢿⣿⣷⣻⢯⣿⡽⣻⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣇⠸⣿⣿⣆⠹⣿⣿⢾⣟⣯⣿⣿⣿⣿⣿⣿⣽⣻⣿⣿⣿⣿⣿⣿⣿⣿⣷⡌\n",
+"⣿⣿⣿⣿⣿⣿⣻⣽⡿⣿⣎⠙⣿⣞⣷⡌⢻⣟⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣷⣿⣿⣿⣿⣿⣿⡄⠹⣿⣿⡆⠻⣿⣟⣯⡿⣽⡿⣿⣿⣿⣿⣽⡷⣯⣿⣿⣿⣿⣿⣿⣿⣿⣿\n",
+"⣿⣿⣿⣿⣿⣿⣟⣷⣿⣿⣿⡀⠹⣟⣾⣟⣆⠹⣯⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡇⢠⡘⣿⣿⡄⠉⢿⣿⣽⡷⣿⣻⣿⣿⣿⣿⡝⣷⣯⢿⣿⣿⣿⣿⣿⣿⣿\n",
+"⣿⣿⣿⣿⣿⣿⣯⢿⣾⢿⣿⡄⢄⠘⢿⣞⡿⣧⡈⢷⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡇⢸⣧⠘⣿⣷⠈⣦⠙⢿⣽⣷⣻⣽⣿⣿⣿⣿⣌⢿⣯⢿⣿⣿⣿⣿⣿⣿\n",
+"⣿⣿⣿⣿⣿⣿⣟⣯⣿⢿⣿⡆⢸⡷⡈⢻⡽⣷⡷⡄⠻⣽⣿⣿⡿⣿⣿⣿⣿⣿⣿⣷⣿⣿⣿⣿⣏⢰⣯⢷⠈⣿⡆⢹⢷⡌⠻⡾⢋⣱⣯⣿⣿⣿⣿⡆⢻⡿⣿⣿⣿⣿⡟⣿\n",
+"⣿⣿⣿⣿⣿⣿⡎⣿⢾⡿⣿⡆⢸⣽⢻⣄⠹⣷⣟⣿⣄⠹⣟⣿⣿⣟⣿⣿⣿⣿⣿⣿⣽⣿⣿⣿⡇⢸⣯⣟⣧⠘⣷⠈⡯⠛⢀⡐⢾⣟⣷⣻⣿⣿⣿⡿⡌⢿⣻⣿⣿⣿⣿⡌\n",
+"⣿⣿⣿⣿⣿⣿⣧⢸⡿⣟⣿⡇⢸⣯⣟⣮⢧⡈⢿⣞⡿⣦⠘⠏⣹⣿⣽⢿⣿⣿⣿⣿⣯⣿⣿⣿⡇⢸⣿⣿⣾⡆⠹⢀⣠⣾⣟⣷⡈⢿⣞⣯⢿⣿⣿⣿⢷⠘⣯⣿⣿⣿⣿⣷\n",
+"⣿⣿⣿⣿⣿⣿⣿⡈⣿⢿⣽⡇⠘⠛⠛⠛⠓⠓⠈⠛⠛⠟⠇⢀⢿⣻⣿⣯⢿⣿⣿⣿⣷⢿⣿⣿⠁⣾⣿⣿⣿⣧⡄⠇⣹⣿⣾⣯⣿⡄⠻⣽⣯⢿⣻⣿⣿⡇⢹⣾⣿⣿⣿⣿\n",
+"⣿⣿⣿⣿⣿⣿⣿⡇⢹⣿⡽⡇⢸⣿⣿⣿⣿⣿⣞⣆⠰⣶⣶⡄⢀⢻⡿⣯⣿⡽⣿⣿⣿⢯⣟⡿⢀⣿⣿⣿⣿⣿⣧⠐⣸⣿⣿⣷⣿⣿⣆⠹⣯⣿⣻⣿⣿⣿⢀⣿⢿⣿⣿⣿\n",
+"⣿⣿⣿⣿⣿⣿⣿⣿⠘⣯⡿⡇⢸⣿⣿⣿⣿⣿⣿⣿⣧⡈⢿⣳⠘⡄⠻⣿⢾⣽⣟⡿⣿⢯⣿⡇⢸⣿⣿⣿⣿⣿⣿⡀⢾⣿⣿⣿⣿⣿⣿⣆⠹⣾⣷⣻⣿⡿⡇⢸⣿⣿⣿⣿\n",
+"⣿⣿⣿⣿⣿⣿⣿⣿⡇⢹⣿⠇⢸⣿⣿⣿⣿⣿⣿⣿⣿⣷⣄⠻⡇⢹⣆⠹⣟⣾⣽⣻⣟⣿⣽⠁⣾⣿⣿⣿⣿⣿⣿⣇⣿⣿⠿⠛⠛⠉⠙⠋⢀⠁⢘⣯⣿⣿⣧⠘⣿⣿⣿⣿\n",
+"⣿⣿⣿⣿⣿⣿⣿⣿⣿⡈⣿⡃⢼⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣦⡙⠌⣿⣆⠘⣿⣞⡿⣞⡿⡞⢠⣿⣿⣿⣿⣿⡿⠛⠉⠁⢀⣀⣠⣤⣤⣶⣶⣶⡆⢻⣽⣞⡿⣷⠈⣿⣻⣿⣿\n",
+"⣿⣿⣿⣿⣿⣿⣿⣿⡿⠃⠘⠁⠉⠉⠉⠉⠉⠉⠉⠉⠉⠙⠛⠛⢿⣄⢻⣿⣧⠘⢯⣟⡿⣽⠁⣾⣿⣿⣿⣿⣿⡃⢀⢀⠘⠛⠿⢿⣻⣟⣯⣽⣻⣵⡀⢿⣯⣟⣿⢀⣿⣽⣿⣿\n",
+"⣿⣿⣿⣟⣿⣿⣿⣿⣶⣶⡆⢀⣿⣾⣿⣾⣷⣿⣶⠿⠚⠉⢀⢀⣤⣿⣷⣿⣿⣷⡈⢿⣻⢃⣼⣿⣿⣿⣿⣻⣿⣿⣿⡶⣦⣤⣄⣀⡀⠉⠛⠛⠷⣯⣳⠈⣾⡽⣾⢀⣿⢾⣿⣿\n",
+"⣿⢿⣿⣿⣻⣿⣿⣿⣿⣿⡿⠐⣿⣿⣿⣿⠿⠋⠁⢀⢀⣤⣾⣿⣿⣿⣿⣿⣿⣿⣿⣌⣥⣾⡿⣿⣿⣷⣿⣿⢿⣷⣿⣿⣟⣾⣽⣳⢯⣟⣶⣦⣤⡾⣟⣦⠘⣿⢾⡁⢺⣿⣿⣿\n",
+"⣿⣻⣿⣿⡷⣿⣿⣿⣿⣿⡗⣦⠸⡿⠋⠁⢀⢀⣠⣴⢿⣿⣽⣻⢽⣾⣟⣷⣿⣟⣿⣿⣿⣳⠿⣵⣧⣼⣿⣿⣿⣿⣿⣾⣿⣿⣿⣿⣿⣽⣳⣯⣿⣿⣿⣽⢀⢷⣻⠄⠘⣯⣿⣿\n",
+"⣿⢷⣻⣿⣿⣷⣻⣿⣿⣿⡷⠛⣁⢀⣀⣤⣶⣿⣛⡿⣿⣮⣽⡻⣿⣮⣽⣻⢯⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣯⢀⢸⣿⢀⡆⣿⣿⣿\n",
+"⠸⣟⣯⣿⣿⣷⢿⣽⣿⣿⣷⣿⣷⣆⠹⣿⣶⣯⠿⣿⣶⣟⣻⢿⣷⣽⣻⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⢀⣯⣟⢀⡇⢼⣿⣿\n",
+"⣇⠹⣟⣾⣻⣿⣿⢾⡽⣿⣿⣿⣿⣿⣆⢹⣶⣿⣻⣷⣯⣟⣿⣿⣽⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡿⢀⡿⡇⢸⡇⢸⣿⡇\n",
+"⣿⣆⠹⣷⡻⣽⣿⣯⢿⣽⣻⣿⣿⣿⣿⣆⢻⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠛⢻⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠇⢸⣿⠇⣼⡇⢸⡿⢠\n",
+"⡙⠾⣆⠹⣿⣦⠛⣿⢯⣷⢿⡽⣿⣿⣿⣿⣆⠻⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠃⠎⢸⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠏⢀⣿⣾⣣⡿⡇⢸⢃⣾\n",
+"⣿⣷⡌⢦⠙⣿⣿⣌⠻⣽⢯⣿⣽⣻⣿⣿⣿⣧⠩⢻⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡏⢰⢣⠘⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡿⠃⢀⢀⢿⣞⣷⢿⡇⠉⣼⣿\n",
+"⣿⣽⣆⠹⣧⠘⣿⣿⡷⣌⠙⢷⣯⡷⣟⣿⣿⣿⣷⡀⡹⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣷⣈⠃⣸⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠟⢀⣴⡧⢀⠸⣿⡽⣿⢀⣾⣿⣿\n",
+"⢻⣽⣿⡄⢻⣷⡈⢿⣿⣿⢧⢀⠙⢿⣻⡾⣽⣻⣿⣿⣄⠌⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠛⢁⣰⣾⣟⡿⢀⡄⢿⣟⣿⢀⣿⣿⣿\n",
+"⡄⢿⣿⣷⢀⠹⣟⣆⠻⣿⣿⣆⢀⣀⠉⠻⣿⡽⣯⣿⣿⣷⣈⢻⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡿⠋⢀⣠⠘⣯⣷⣿⡟⢀⢆⠸⣿⡟⢸⣿⣿⣿\n",
+"⣷⡈⢿⣿⣇⢱⡘⢿⣷⣬⣙⠿⣧⠘⣆⢀⠈⠻⣷⣟⣾⢿⣿⣆⠹⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡿⠋⣠⡞⢡⣿⢀⣿⣿⣿⠇⡄⢸⡄⢻⡇⣼⣿⣿⣿\n",
+"⣿⣷⡈⢿⣿⡆⢣⡀⠙⢾⣟⣿⣿⣷⡈⠂⠘⣦⡈⠿⣯⣿⢾⣿⣆⠙⠻⠿⠿⠿⠿⡿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠿⠛⢋⣠⣾⡟⢠⣿⣿⢀⣿⣿⡟⢠⣿⢈⣧⠘⢠⣿⣿⣿⣿\n",
+"⣿⣿⣿⣄⠻⣿⡄⢳⡄⢆⡙⠾⣽⣿⣿⣆⡀⢹⡷⣄⠙⢿⣿⡾⣿⣆⢀⡀⢀⢀⢀⢀⢀⢀⢀⢀⢀⢀⢀⢀⣀⣠⣴⡿⣯⠏⣠⣿⣿⡏⢸⣿⡿⢁⣿⣿⢀⣿⠆⢸⣿⣿⣿⣿\n",
+"⣿⣿⣿⣿⣦⡙⣿⣆⢻⡌⢿⣶⢤⣉⣙⣿⣷⡀⠙⠽⠷⠄⠹⣿⣟⣿⣆⢙⣋⣤⣤⣤⣄⣀⢀⢀⢀⢀⣾⣿⣟⡷⣯⡿⢃⣼⣿⣿⣿⠇⣼⡟⣡⣿⣿⣿⢀⡿⢠⠈⣿⣿⣿⡟\n",
+"⣿⣿⣿⣿⣿⣷⣮⣿⣿⣿⡌⠁⢤⣤⣤⣤⣬⣭⣴⣶⣶⣶⣆⠈⢻⣿⣿⣆⢻⣿⣿⣿⣿⣿⣿⣷⣶⣤⣌⣉⡘⠛⠻⠶⣿⣿⣿⣿⡟⣰⣫⣴⣿⣿⣿⣿⠄⣷⣿⠆⢻⣿⣿⡇\n",
+"\n\t\tAwoo~!\n\n\t\t<Cute spash-screen>"
     );
     sleep(2);
     clear();
@@ -158,20 +173,20 @@ fn introduction() {
         let uwu = user_input();
         match &uwu[..] {
             // if input (uwu) is "" or "s" or "start", exit introduction()
-            // and initialize game. 
+            // and initialize game.
             "" | "s" | "start" => break,
             // if else, fetch info to print for commands from intro_help().
             _ => intro_help(&uwu),
         }
     }
 }
-// info to print for certain commands inputted. 
+// info to print for certain commands inputted.
 fn intro_help(input: &str) {
     clear();
     match input {
         "" | "s" | "start" => panic!("it should never pass through here"),
         "m" | "menu" => println!(
-            "{}{}{}{}{}{}{}{}{}{}",
+            "{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}",
             "\n\n\n\tcli-checkers\n\n\n",
             "\tCommands:\n",
             "\tEnter \"s\" or \"start\" or \"\" (no arguments) to start the game\n",
@@ -179,8 +194,32 @@ fn intro_help(input: &str) {
             "\tEnter \"c\" or \"commands\" to list all commands\n",
             "\tEnter \"h\" or \"help\" for game instructions\n",
             "\tEnter \"i\" or \"info\" for information about the project\n",
-            "\tEnter \"OwO\" or \"owo\" for secret\n\n\n",
-            "\t<insert ascii art here>\n\n\n\n",
+            "\tEnter \"OwO\" or \"owo\" for secret\n\n",
+            "\t⠀⠀⠀⠀⢸⠀⠀⠀⠀⠀⢠⡀⠀⠀⡠⠑⠁⠀⠀⠀⠀⠀⠀⠀⠙⠿⣿⣿⣽⣿⣿⣿⣿⣿⣿⣿⣷⠀⠀⠈⠢⠀⠀⠀⠀⠀⠀⠀⠀⠀\n",
+            "\t⠀⠀⠀⠀⢸⠀⠀⠀⠀⠰⠚⠘⡠⠊⠀⠀⠀⠀⠀⠀⠀⠀⢀⠔⠀⠀⠈⠛⠻⠿⠿⣿⣿⣿⣿⣿⣿⣤⣀⠀⠀⠐⡀⠀⠀⠀⠀⠀⠀⠀\n",
+            "\t⠀⠀⠀⠀⢸⠀⠀⠀⠀⠀⢀⠎⠀⠀⠀⠀⠀⠀⠀⠀⠀⡔⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠉⠀⠁⠀⠙⠓⠒⠢⠼⠤⠤⠤⠤⠤⢀⣀\n",
+            "\t⠀⠀⠀⠀⠀⡆⠀⠀⠀⡰⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠌⢠⠂⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀\n",
+            "\t⠀⠀⠀⠀⠀⢡⠀⠀⡰⠁⠀⠀⠀⢀⠀⠀⠀⠀⢀⡌⢠⡎⠀⠀⠀⠀⠀⠀⠀⠀⡔⠁⣰⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⡄⠀⠀⠀⠀⠀\n",
+            "\t⠀⠀⠀⠀⠀⢊⠂⠰⠁⠀⠀⠀⢀⠂⠀⠀⣀⠔⢱⢠⠃⡇⠀⠀⠀⠀⠀⠀⢀⠎⠀⠔⢹⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⢓⠞⠁⠀⠀⠀\n",
+            "\t⠀⢀⠔⠂⠁⠙⣄⠃⢠⠃⠀⠀⠆⠀⠀⢀⠊⠑⣦⡇⠀⡇⠀⠀⠀⠀⠀⣤⠃⢀⠊⠀⢸⠀⢰⠀⠀⠀⠀⠀⠀⠀⠀⠠⠃⠀⠀⠀⠀⠀\n",
+            "\t⢠⠚⠀⠀⠀⠀⡘⠀⢾⠀⠀⠸⠀⠀⢠⠃⠀⠀⡟⠀⠀⢰⠀⠀⠀⠀⡰⠏⡩⠉⠉⠉⢹⠀⡄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⡠⠊\n",
+            "\t⡜⠀⠀⠀⠀⠀⡇⠸⠣⠀⠀⡇⠀⢸⠓⠶⠶⣤⣁⡀⠀⠘⡄⠀⠀⡔⢙⠜⠀⠀⠀⠀⢸⢰⠀⠀⠀⠀⠀⢠⠀⠀⠀⠀⠀⠀⡠⠊⠀⠀\n",
+            "\t⢸⠀⠀⠀⠀⢰⠀⠇⢀⠀⠀⣇⢀⡮⣂⡤⠴⢖⠛⠁⠀⠀⠱⡀⠜⠀⠁⠶⣿⡛⠛⠛⢻⠖⠂⠀⠀⠀⠀⡌⠀⠀⠀⢀⡠⢊⠀⠀⠀⠀\n",
+            "\t⠈⢑⠀⠀⠀⢸⢸⠀⢸⠀⢠⡇⣸⠂⠀⠌⠈⠀⠀⠀⠀⠂⠀⠈⠀⠀⡀⠄⡊⠛⢷⣤⡌⡀⠀⠀⠀⠀⡐⠀⠀⢀⠔⡿⣗⢜⡄⠀⠀⠀\n",
+            "\t⡤⠖⠛⠓⠒⢺⡖⠔⠊⡆⢸⡇⢹⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠁⠀⠁⡂⠄⠨⡘⠈⠀⠀⠀⠀⡰⠁⣀⢤⡶⠷⠉⠁⠉⠑⠄⠤⡀\n",
+            "\t⠀⠀⠀⠀⠀⠈⡇⠀⠀⠱⢸⠠⠘⡄⠀⠀⠀⠀⠀⠀⠀⣶⠀⠀⠀⠀⠀⠀⠀⢀⡔⠀⠀⠀⠀⠐⡰⣁⠝⠠⡋⠁⠀⠀⠀⠀⠀⠀⠀⠸\n",
+            "\t⠀⠀⢀⠔⠒⢄⠃⠀⠀⠀⢹⠀⢰⡟⢦⡀⠀⠀⠀⠀⠀⠿⠇⠀⠀⠀⠀⠀⢠⠌⠀⠀⢀⠔⠀⡐⡙⠀⡜⢨⠀⠀⠀⠀⠀⠀⠀⠀⠀⢘\n",
+            "\t⢀⠔⠁⠀⣀⣈⣂⡀⠀⠀⠘⡀⣶⡇⠀⡝⡦⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⡰⠃⠀⢀⡴⡟⢀⠌⣰⠁⡰⡇⢨⡀⠀⠀⠀⠀⢠⠀⠀⠀⠔\n",
+            "\t⡏⠀⢠⣾⣿⡦⠤⠸⡄⠀⠀⢻⢸⠱⠀⡇⠑⡈⠢⣤⣤⣀⣤⣤⣤⣤⡖⠀⢀⠔⣽⠏⠈⡠⢞⠆⡐⠁⡇⢠⠢⢄⠀⠀⠀⢸⣇⡠⠚⠀\n",
+            "\t⢇⢰⣿⣿⣿⡇⠐⠈⠉⡆⠀⡏⢸⠀⠑⢼⡀⠈⣢⣀⠬⠟⠛⠉⠁⡘⠀⡰⠓⠰⠧⠶⢿⠌⠊⠊⠀⠀⠸⠆⠀⠀⠉⠓⠉⠉⣿⡀⠀⢀\n",
+            "\t⢸⣿⣿⣿⣿⡇⢰⣂⡰⠁⢰⠀⢸⣀⡀⠈⠫⡁⠀⠀⠀⠀⠀⠀⢰⢁⢮⠃⠀⠀⢠⡊⢻⡀⠀⢀⣀⣀⣀⠃⠀⠀⠀⠀⠀⠀⠈⢻⣿⣿\n",
+            "\t⢸⣿⣿⣿⣿⣧⠀⡆⠀⢀⠔⡆⠸⠀⢈⠕⠒⡮⡂⠀⠀⠀⠀⠀⡠⠃⡆⢀⡀⣀⡰⠗⠒⢲⠋⠀⠀⠀⠀⠑⢄⠀⠀⠀⠀⠀⠀⠀⢻⣿\n",
+            "\t⣿⣿⣿⣿⣿⣿⠞⠀⢠⠋⠀⠑⢀⡇⡌⠀⠀⠠⠒⠀⠀⠀⠒⢶⠁⢸⠀⠎⠉⠀⠀⠀⠀⡎⠀⠀⠀⠀⠀⠀⠈⣦⠀⠀⠀⠀⠀⠀⠀⠙\n",
+            "\t⣿⣿⣿⣿⣿⡇⢠⢠⠃⠀⠀⠀⢀⠜⠀⣠⠐⠈⠀⠀⠀⠀⠀⠘⡀⡆⠀⠀⠀⠀⠀⠀⡸⠀⠀⠀⠀⠀⠀⠀⠀⢻⠀⠀⠀⠀⠀⠀⠀⠀\n",
+            "\t⣿⣿⣿⣿⡿⠁⡜⡎⠀⠀⠀⣀⠜⠀⠀⠎⠀⠀⠀⠀⠀⠀⠀⠀⠘⡧⡀⠀⠀⠀⣀⠀⠇⣆⡠⡀⠀⠀⠀⠀⠀⢸⡄⠀⠀⠀⠀⠀⠀⠀\n",
+            "\t⣿⣿⣿⡟⠁⠀⡿⡤⠔⠂⠁⠀⠀⠀⢸⡀⠀⠀⠀⠀⠀⠀⣠⠴⡀⡖⠓⠀⠀⡜⠁⠛⠫⡀⠀⠘⡄⠀⠀⠀⠀⠈⡇⠀⠀⠀⠀⠀⠀⠀\n",
+            "\t⣿⣿⠏⠀⢀⡼⠉⠀⠀⠀⠀⠀⠀⠀⠀⠃⠀⠀⠀⢀⠔⠋⠀⠀⠑⠁⠀⡔⠉⠑⢄⠀⣀⣼⡇⠀⠰⠀⠀⠀⠀⠀⢣⠀⠀⠀⠀⠀⠀⠀\n",
+            "\t⠟⠁⠀⡰⠋⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⠤⠤⠄⠰⠁⠀⠀⠀⠀⠀⠀⡎⠳⠄⠀⠀⢸⣿⣿⣿⣦⣠⣷⣾⣿⣿⣷⣾⠀⠀⠀⠀⠀⠀⠀\n\n\n\n",
             "\tPress enter key to begin"
         ),
         "c" | "commands" => println!(
@@ -201,7 +240,7 @@ fn intro_help(input: &str) {
             "\tall of the opponent's pieces.\n\n",
             "\tWhen performing a move, you first enter the coordinates of\n",
             "\tthe piece you wish to move; then, the destination coordinates.\n",
-            "\tThere are several ways to enter coordinates:\n\n", 
+            "\tThere are several ways to enter coordinates:\n\n",
             "\t\t\"12\" :enter: \"23\" :enter:\n",
             "\t\t\"1223\" :enter:\n\n",
             "\tBoth of the examples given moves a piece at coordinates (1, 2)\n",
@@ -218,8 +257,6 @@ fn intro_help(input: &str) {
             "\tOnce you capture an enemy piece, you will have the opportunity\n",
             "\tto perform another action. If you wish not to, simply hit\n",
             "\t:enter: with no arguments and your turn will end."
-            
-            
         ),
         "i" | "info" => println!(
             "{}{}{}{}{}{}{}{}{}{}",
@@ -234,9 +271,7 @@ fn intro_help(input: &str) {
             "\tI don't knyow why I am wwiting dis in my AP Pewfowmance\n",
             "\tTask, but I wondew what the AP Gwadews wiww think of dis!\n",
         ),
-        "OwO" | "owo" | "Owo" => println!(
-            "\nUwU"
-        ),
+        "OwO" | "owo" | "Owo" => println!("\nUwU"),
         _ => println!(
             "\n\n\n\nCommand not found: \"{}\"\n{}",
             input, "See the list of available commands: \"c\" | \"commands\""
@@ -245,7 +280,7 @@ fn intro_help(input: &str) {
 }
 
 // Assists in initializing the HashMap "stats" when starting the game.
-// Almost like putting all the Checkers pieces in the default starting place. 
+// Almost like putting all the Checkers pieces in the default starting place.
 fn initialize_pieces(x: i8, y: i8) -> Tile {
     if ((x + (y % 2)) % 2) == 1 {
         match y {
@@ -270,8 +305,8 @@ fn initialize_pieces(x: i8, y: i8) -> Tile {
     }
 }
 
-// manages user input for coordinates. 
-// fn returns the full coordinates: ((x, y), (x, y)) 
+// manages user input for coordinates.
+// fn returns the full coordinates: ((x, y), (x, y))
 // fn also returns whether the player should go again and whether
 // the user cancelled the second input sequence using "esc".
 fn input_full_coords(
@@ -622,7 +657,8 @@ fn check_if_promote_to_king(stats: &mut HashMap<(i8, i8), Tile>, whos_turn: &Pla
     if *whos_turn == PlayerTurn::P1 {
         players_piece = Occupancy::P1;
         i0_or_7 = 7;
-    } else { // PlayerTurn::P2
+    } else {
+        // PlayerTurn::P2
         players_piece = Occupancy::P2;
         i0_or_7 = 0;
     }
@@ -648,7 +684,7 @@ fn check_if_game_over(stats: &HashMap<(i8, i8), Tile>) -> bool {
         for x in 0..8 {
             match stats.get(&(x, y)).unwrap().state {
                 Occupancy::P1 => player1s = false,
-                Occupancy::P2 => player2s = false, 
+                Occupancy::P2 => player2s = false,
                 Occupancy::Emp => {}
             }
         }
