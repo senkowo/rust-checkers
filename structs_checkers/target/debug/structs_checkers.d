@@ -1,1 +1,1 @@
-/Users/kaiarntz/vsCodeAll_/rust_projects/rust-checkers/structs_checkers/target/debug/structs_checkers: /Users/kaiarntz/vsCodeAll_/rust_projects/rust-checkers/structs_checkers/src/main.rs
+/Users/kaiarntz/things-to-keep-in-home-dir/vsCodeAll_/rust_projects/rust-checkers/structs_checkers/target/debug/structs_checkers: /Users/kaiarntz/things-to-keep-in-home-dir/vsCodeAll_/rust_projects/rust-checkers/structs_checkers/src/main.rs
