@@ -209,7 +209,7 @@ fn intro_help(input: &str) {
             "\t\"OwO\" | \"owo\""
         ),
         "h" | "help" => println!(
-            "{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}",
+            "{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}",
             "\n\n\tWelcome to cli-checkers!\n\n",
             "\tOwO what's this?\n",
             "\tThis is a two-player game where the objective is to capture\n",
@@ -232,7 +232,8 @@ fn intro_help(input: &str) {
             "\tmove backwards once you reach the other side of the board.\n\n",
             "\tOnce you capture an enemy piece, you will have the opportunity\n",
             "\tto perform another action. If you wish not to, simply hit\n",
-            "\t:enter: with no arguments and your turn will end."
+            "\t:enter: with no arguments and your turn will end.\n\n",
+            "\tEntering \"exit\" will terminate the program at any time."
         ),
         "i" | "info" => println!(
             "{}{}{}{}{}{}{}{}{}{}",
