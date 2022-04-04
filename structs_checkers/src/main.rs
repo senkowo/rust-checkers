@@ -65,7 +65,7 @@ fn main() {
         // and whether the user entered 'esc' after entering the
         // first coordinate input.
         let (full_move_argument, enter_pressed_in_second_play, escape_current_entry) =
-            input_full_coords(&whos_turn, &mut player_goes_again, &stats);
+            input_full_coords(&whos_turn, &mut player_goes_again);
 
         // if true, end turn and go to next player.
         if enter_pressed_in_second_play {
@@ -106,7 +106,7 @@ fn main() {
         // HashMap "stats".
         // logic_move() will return whether the player should go again,
         // in the instance that the player captured an enemy piece.
-        player_goes_again = logic_move(&whos_turn, &full_move_argument, &mut stats);
+        player_goes_again = logic_move(&full_move_argument, &mut stats);
 
         // check if need to promote to king, and update "stats"
         check_if_promote_to_king(&mut stats, &whos_turn);
@@ -290,12 +290,11 @@ fn initialize_pieces(x: i8, y: i8) -> Tile {
 fn input_full_coords(
     whos_turn: &PlayerTurn,
     player_goes_again: &mut bool,
-    stats: &HashMap<(i8, i8), Tile>,
 ) -> (((i8, i8), (i8, i8)), bool, bool) {
     let mut full_move_action: Vec<char> = Vec::new();
 
     let first_output_of_chars: Vec<char> =
-        input_single_coords(1, player_goes_again, &whos_turn, &stats);
+        input_single_coords(1, player_goes_again, &whos_turn);
     // very messy code
     match first_output_of_chars.get(0) {
         Some(v) => {
@@ -317,7 +316,7 @@ fn input_full_coords(
     // if only one pair of coordinates were inputted, then request for only
     // the destination coordinate pair. 
     if full_move_action.len() == 2 {
-        let second_output_of_chars = input_single_coords(2, player_goes_again, whos_turn, &stats);
+        let second_output_of_chars = input_single_coords(2, player_goes_again, whos_turn);
         match second_output_of_chars.get(0) {
             Some(v) => {
                 if *v == 'x' {
@@ -376,7 +375,6 @@ fn input_single_coords(
     first_or_second: u8,
     player_goes_again: &mut bool,
     whos_turn: &PlayerTurn,
-    stats: &HashMap<(i8, i8), Tile>,
 ) -> Vec<char> {
     'outer: loop {
         if *player_goes_again {
@@ -400,7 +398,7 @@ fn input_single_coords(
             if first_or_second == 1 {
                 "Enter move coordinates\n\t(e.g. [x, y] : \"12:enter:23\" or \"1223\"): "
             } else {
-                "Input destination coordinate\n\t(e.g. \"23\") (Note: enter \"esc\" to cancel): "
+                "Input destination coordinates\n\t(e.g. \"23\") (Note: enter \"esc\" to cancel): "
             }
         );
         ioflush();
@@ -583,7 +581,6 @@ fn logic_check(
 }
 // if logic_check() returned true, execute/implement the action. 
 fn logic_move(
-    whos_turn: &PlayerTurn,
     double_coodinates: &((i8, i8), (i8, i8)),
     stats: &mut HashMap<(i8, i8), Tile>,
 ) -> bool {
