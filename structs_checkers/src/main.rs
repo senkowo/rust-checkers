@@ -1,4 +1,4 @@
-//
+// A beginner Checkers project in Rust
 
 use std::collections::HashMap;
 use std::convert::TryInto;
@@ -131,9 +131,9 @@ fn main() {
 fn introduction() {
     clear();
     println!(
-        "{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}",
+        "\n\n{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}",
         // Random ascii art
-        "\n\n⣿⣿⣿⣿⣿⣿⡷⣯⢿⣿⣷⣻⢯⣿⡽⣻⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣇⠸⣿⣿⣆⠹⣿⣿⢾⣟⣯⣿⣿⣿⣿⣿⣿⣽⣻⣿⣿⣿⣿⣿⣿⣿⣿⣷⡌\n",
+        "⣿⣿⣿⣿⣿⣿⡷⣯⢿⣿⣷⣻⢯⣿⡽⣻⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣇⠸⣿⣿⣆⠹⣿⣿⢾⣟⣯⣿⣿⣿⣿⣿⣿⣽⣻⣿⣿⣿⣿⣿⣿⣿⣿⣷⡌\n",
         "⣿⣿⣿⣿⣿⣿⣻⣽⡿⣿⣎⠙⣿⣞⣷⡌⢻⣟⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣷⣿⣿⣿⣿⣿⣿⡄⠹⣿⣿⡆⠻⣿⣟⣯⡿⣽⡿⣿⣿⣿⣿⣽⡷⣯⣿⣿⣿⣿⣿⣿⣿⣿⣿\n",
         "⣿⣿⣿⣿⣿⣿⣟⣷⣿⣿⣿⡀⠹⣟⣾⣟⣆⠹⣯⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡇⢠⡘⣿⣿⡄⠉⢿⣿⣽⡷⣿⣻⣿⣿⣿⣿⡝⣷⣯⢿⣿⣿⣿⣿⣿⣿⣿\n",
         "⣿⣿⣿⣿⣿⣿⣯⢿⣾⢿⣿⡄⢄⠘⢿⣞⡿⣧⡈⢷⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡇⢸⣧⠘⣿⣷⠈⣦⠙⢿⣽⣷⣻⣽⣿⣿⣿⣿⣌⢿⣯⢿⣿⣿⣿⣿⣿⣿\n",
@@ -181,7 +181,7 @@ fn introduction() {
         }
     }
 }
-// info to print for certain commands inputted.
+// what to print for various commands.
 fn intro_help(input: &str) {
     clear();
     match input {
@@ -286,6 +286,7 @@ fn initialize_pieces(x: i8, y: i8) -> Tile {
 // fn returns the full coordinates: ((x, y), (x, y))
 // fn also returns whether the player should go again and whether
 // the user cancelled the second input sequence using "esc".
+// perhaps I could simplify this mess with an enum... 
 fn input_full_coords(
     whos_turn: &PlayerTurn,
     player_goes_again: &mut bool,
@@ -295,6 +296,7 @@ fn input_full_coords(
 
     let first_output_of_chars: Vec<char> =
         input_single_coords(1, player_goes_again, &whos_turn, &stats);
+    // very messy code
     match first_output_of_chars.get(0) {
         Some(v) => {
             if *v == 'e' {
@@ -306,13 +308,14 @@ fn input_full_coords(
         }
         None => {} // convoluted, but it works
                    // true, false means that blank enter was pressed...
+                   // enums will help a lot. 
     }
     for v in first_output_of_chars.iter() {
         full_move_action.push(*v);
     }
 
-    //println!("full_move action before second: {:?}", full_move_action); //debug
-
+    // if only one pair of coordinates were inputted, then request for only
+    // the destination coordinate pair. 
     if full_move_action.len() == 2 {
         let second_output_of_chars = input_single_coords(2, player_goes_again, whos_turn, &stats);
         match second_output_of_chars.get(0) {
@@ -343,7 +346,7 @@ fn input_full_coords(
                 full_move_action[0] // is char (e.g. '4')
                     .to_digit(10) // method to_digit() returns u32.
                     .unwrap()
-                    .try_into() // method try_into() returns appropriate (u8).
+                    .try_into() // method try_into() returns appropriate (i8).
                     .unwrap(),
                 full_move_action[1]
                     .to_digit(10)
@@ -364,10 +367,11 @@ fn input_full_coords(
                     .unwrap(),
             ),
         ),
-        false,
+        false, // use enums?
         false,
     )
 }
+// input_single_coords() assists in receiving and processing input for the previous function.
 fn input_single_coords(
     first_or_second: u8,
     player_goes_again: &mut bool,
@@ -400,21 +404,28 @@ fn input_single_coords(
             }
         );
         ioflush();
+        // request user input.
         let input = user_input();
-
+        
         if *player_goes_again {
             match &input[..] {
-                // messy code
+                // if player gets a second turn and enters "" or "end", return
+                // vec!['e'] to end turn. 
+                // very messy code. 
+                // what if user just types char 'e'?
                 "" | "end" => {
                     return vec!['e'];
                 }
                 _ => {}
             }
         // in the case of entering with no input, return special char 'o' to reset.
+        // messy code
         } else if &input[..] == "" {
             return vec!['o'];
         }
-        //println!("is it first or second: {:?}", first_or_second);
+        // if entering only destination coordinates and entered "esc", return
+        // vec!['x'] to indicate re-input. 
+        // What if I return an enum from this fn instead?
         if first_or_second == 2 {
             match &input[..] {
                 "esc" => {
@@ -462,6 +473,8 @@ fn input_single_coords(
     }
 }
 
+// performs a bunch of tests on the coordinates entered to see if the action
+// requested could be performed. 
 fn logic_check(
     whos_turn: &PlayerTurn,
     double_coodinates: &((i8, i8), (i8, i8)),
@@ -470,8 +483,8 @@ fn logic_check(
     let ((a, b), (c, d)) = double_coodinates;
     //println!("stats status: {:?}", stats.get(&(*a, *b)).unwrap().state); //debug
 
-    // checks if the first coordinate is the current player's piece
-    // and if the second coordinate is empty.
+    // checks if the first coordinate is the current player's piece and if
+    // the second coordinate is empty.
     match whos_turn {
         &PlayerTurn::P1 => {
             if stats.get(&(*a, *b)).unwrap().state == Occupancy::P1 {
@@ -498,18 +511,9 @@ fn logic_check(
             }
         }
     }
-
-    // checks if the move performed is a single movement diagonally,
-    // and if the piece being moved is a double, backwards movement
-    // is also accepted. Also, if the piece moves 2 spaces diagonally,
-    // it checks if there is an enemy piece in between the original
-    // and moved direction. If yes, the enemy piece is removed, and
-    // the player gets to make another move. Also, after a capture
-    // is performed, make it so the player gets to chose whether or
-    // not he would like to try again (type "end" to end turn).
-
-    let mut check_for_capture = false;
+    
     // check if the movement in the y-direction is appropriate.
+    let mut check_for_capture = false;
     match whos_turn {
         &PlayerTurn::P1 => match stats.get(&(*a, *b)).unwrap().level {
             Level::Single => match d - b {
@@ -543,8 +547,8 @@ fn logic_check(
         },
     }
 
-    // check if the movement in the x direction is appropriate,
-    // relative to the y.
+    // check if the movement in the x direction is appropriate, relative
+    // to the y.
     match d - b {
         1 | -1 => match c - a {
             1 | -1 => {}
@@ -557,9 +561,8 @@ fn logic_check(
         _ => return false,
     }
 
-    // if move 2 spaces diagonally, then check what it jumped over.
-    // if it jumped over an empty space or your own piece, then
-    // return false.
+    // if the piece moves 2 spaces diagonally, then check what it jumped over.
+    // if it jumped over an empty space or your own piece, then return false.
     if check_for_capture {
         match stats.get(&((a + c) / 2, (b + d) / 2)).unwrap().state {
             Occupancy::Emp => return false,
@@ -578,6 +581,7 @@ fn logic_check(
 
     true // the default output if it survives all the checks
 }
+// if logic_check() returned true, execute/implement the action. 
 fn logic_move(
     whos_turn: &PlayerTurn,
     double_coodinates: &((i8, i8), (i8, i8)),
@@ -592,7 +596,7 @@ fn logic_move(
     // first, change the state(P1/emp) and level(Single/emp) of
     // the initial and destination moves.
 
-    // create/new (from Emp)
+    // create a new piece of the same types in the destination coordinate
     stats.insert(
         (*c, *d),
         Tile {
@@ -600,7 +604,7 @@ fn logic_move(
             level: stats.get(&(*a, *b)).unwrap().clone().level,
         },
     );
-    // overwrite initial
+    // overwrite the initial piece with an empty tile
     stats.insert(
         (*a, *b),
         Tile {
@@ -609,8 +613,8 @@ fn logic_move(
         },
     );
 
-    // then, if it jumps over a piece (already confirmed to be
-    // enemy's), then remove that piece (state.Occupancy::Emp)
+    // then, if it jumps over a piece (already confirmed to be enemy's),
+    // then make it an empty tile. 
     match d - b {
         2 | -2 => {
             stats.insert(
@@ -623,12 +627,14 @@ fn logic_move(
             true
         }
         // if an enemy piece is taken, return true and if not,
-        // return false. The function return goes into variable
+        // return false. The return value goes into the variable
         // "player_goes_again: bool".
         _ => false,
     }
 }
 
+// check if your piece should be promoted to a king. This happens when 
+// your piece reaches the other side of the board. 
 fn check_if_promote_to_king(stats: &mut HashMap<(i8, i8), Tile>, whos_turn: &PlayerTurn) {
     let players_piece;
     let i0_or_7;
@@ -655,6 +661,7 @@ fn check_if_promote_to_king(stats: &mut HashMap<(i8, i8), Tile>, whos_turn: &Pla
     }
 }
 
+// check if the game is over. 
 fn check_if_game_over(stats: &HashMap<(i8, i8), Tile>) -> bool {
     let mut player1s = true;
     let mut player2s = true;
@@ -675,6 +682,7 @@ fn check_if_game_over(stats: &HashMap<(i8, i8), Tile>) -> bool {
     }
 }
 
+// prints the UI (board) according to Hashmap "stats"
 fn print_board(stats: &HashMap<(i8, i8), Tile>) {
     // spaghetti-code UI printing algorithm:
     println!("    ,______ ______ ______ ______ ______ ______ ______ ______,");
