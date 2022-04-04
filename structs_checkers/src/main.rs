@@ -163,7 +163,7 @@ fn introduction() {
         "⣿⣿⣿⣄⠻⣿⡄⢳⡄⢆⡙⠾⣽⣿⣿⣆⡀⢹⡷⣄⠙⢿⣿⡾⣿⣆⢀⡀⢀⢀⢀⢀⢀⢀⢀⢀⢀⢀⢀⢀⣀⣠⣴⡿⣯⠏⣠⣿⣿⡏⢸⣿⡿⢁⣿⣿⢀⣿⠆⢸⣿⣿⣿⣿\n",
         "⣿⣿⣿⣿⣦⡙⣿⣆⢻⡌⢿⣶⢤⣉⣙⣿⣷⡀⠙⠽⠷⠄⠹⣿⣟⣿⣆⢙⣋⣤⣤⣤⣄⣀⢀⢀⢀⢀⣾⣿⣟⡷⣯⡿⢃⣼⣿⣿⣿⠇⣼⡟⣡⣿⣿⣿⢀⡿⢠⠈⣿⣿⣿⡟\n",
         "⣿⣿⣿⣿⣿⣷⣮⣿⣿⣿⡌⠁⢤⣤⣤⣤⣬⣭⣴⣶⣶⣶⣆⠈⢻⣿⣿⣆⢻⣿⣿⣿⣿⣿⣿⣷⣶⣤⣌⣉⡘⠛⠻⠶⣿⣿⣿⣿⡟⣰⣫⣴⣿⣿⣿⣿⠄⣷⣿⠆⢻⣿⣿⡇\n",
-        "\n\t\tAwoo~!\n\n\t\t<Cute spash-screen>"
+        "\n\t\tAwoo~!\n\n\t\t>Cute spash-screen<"
     );
     sleep(2);
     clear();
@@ -400,10 +400,6 @@ fn input_single_coords(
         );
         ioflush();
         let input = user_input();
-
-        if input == "exit" {
-            panic!("exit command used, crashed program");
-        }
 
         if *player_goes_again {
             match &input[..] {
@@ -748,6 +744,11 @@ fn user_input() -> String {
         .read_line(&mut ret)
         .expect("OwO what's this? Failed to read line");
     ret.pop();
+    
+    if ret == "exit" {
+        panic!("exit command used, crashed program");
+    }
+
     ret
 }
 fn change_current_player(whos_turn: &mut PlayerTurn) {
