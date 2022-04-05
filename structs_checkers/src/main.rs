@@ -36,7 +36,7 @@ fn main() {
     // the game.
     introduction();
 
-    clear();
+    clear(); // clears terminal
 
     // Hashmap "stats" stores a key of tuple (i8, i8), which represents
     // the x and y coordinates of a given tile on the checkerboard.
@@ -286,15 +286,14 @@ fn initialize_pieces(x: i8, y: i8) -> Tile {
 // fn returns the full coordinates: ((x, y), (x, y))
 // fn also returns whether the player should go again and whether
 // the user cancelled the second input sequence using "esc".
-// perhaps I could simplify this mess with an enum... 
+// perhaps I could simplify this mess with an enum...
 fn input_full_coords(
     whos_turn: &PlayerTurn,
     player_goes_again: &mut bool,
 ) -> (((i8, i8), (i8, i8)), bool, bool) {
     let mut full_move_action: Vec<char> = Vec::new();
 
-    let first_output_of_chars: Vec<char> =
-        input_single_coords(1, player_goes_again, &whos_turn);
+    let first_output_of_chars: Vec<char> = input_single_coords(1, player_goes_again, &whos_turn);
     // very messy code
     match first_output_of_chars.get(0) {
         Some(v) => {
@@ -307,14 +306,14 @@ fn input_full_coords(
         }
         None => {} // convoluted, but it works
                    // true, false means that blank enter was pressed...
-                   // enums will help a lot. 
+                   // enums will help a lot.
     }
     for v in first_output_of_chars.iter() {
         full_move_action.push(*v);
     }
 
     // if only one pair of coordinates were inputted, then request for only
-    // the destination coordinate pair. 
+    // the destination coordinate pair.
     if full_move_action.len() == 2 {
         let second_output_of_chars = input_single_coords(2, player_goes_again, whos_turn);
         match second_output_of_chars.get(0) {
@@ -404,12 +403,12 @@ fn input_single_coords(
         ioflush();
         // request user input.
         let input = user_input();
-        
+
         if *player_goes_again {
             match &input[..] {
                 // if player gets a second turn and enters "" or "end", return
-                // vec!['e'] to end turn. 
-                // very messy code. 
+                // vec!['e'] to end turn.
+                // very messy code.
                 // what if user just types char 'e'?
                 "" | "end" => {
                     return vec!['e'];
@@ -422,7 +421,7 @@ fn input_single_coords(
             return vec!['o'];
         }
         // if entering only destination coordinates and entered "esc", return
-        // vec!['x'] to indicate re-input. 
+        // vec!['x'] to indicate re-input.
         // What if I return an enum from this fn instead?
         if first_or_second == 2 {
             match &input[..] {
@@ -464,6 +463,7 @@ fn input_single_coords(
                     return output_as_chars;
                 } else {
                     println!("|=> Error: incorrent input; can only be 2 numbers.");
+                    sleep(2);
                 }
             }
             _ => println!("error at first_or_second"),
@@ -472,7 +472,7 @@ fn input_single_coords(
 }
 
 // performs a bunch of tests on the coordinates entered to see if the action
-// requested could be performed. 
+// requested could be performed.
 fn logic_check(
     whos_turn: &PlayerTurn,
     double_coodinates: &((i8, i8), (i8, i8)),
@@ -509,7 +509,7 @@ fn logic_check(
             }
         }
     }
-    
+
     // check if the movement in the y-direction is appropriate.
     let mut check_for_capture = false;
     match whos_turn {
@@ -579,7 +579,7 @@ fn logic_check(
 
     true // the default output if it survives all the checks
 }
-// if logic_check() returned true, execute/implement the action. 
+// if logic_check() returned true, execute/implement the action.
 fn logic_move(
     double_coodinates: &((i8, i8), (i8, i8)),
     stats: &mut HashMap<(i8, i8), Tile>,
@@ -611,7 +611,7 @@ fn logic_move(
     );
 
     // then, if it jumps over a piece (already confirmed to be enemy's),
-    // then make it an empty tile. 
+    // then make it an empty tile.
     match d - b {
         2 | -2 => {
             stats.insert(
@@ -630,24 +630,24 @@ fn logic_move(
     }
 }
 
-// check if your piece should be promoted to a king. This happens when 
-// your piece reaches the other side of the board. 
+// check if your piece should be promoted to a king. This happens when
+// your piece reaches the other side of the board.
 fn check_if_promote_to_king(stats: &mut HashMap<(i8, i8), Tile>, whos_turn: &PlayerTurn) {
     let players_piece;
-    let i0_or_7;
+    let i0_7;
     if *whos_turn == PlayerTurn::P1 {
         players_piece = Occupancy::P1;
-        i0_or_7 = 7;
+        i0_7 = 7;
     } else {
         // PlayerTurn::P2
         players_piece = Occupancy::P2;
-        i0_or_7 = 0;
+        i0_7 = 0;
     }
     for x in 0..8 {
-        if stats.get(&(x, i0_or_7)).unwrap().state == players_piece {
-            if stats.get(&(x, i0_or_7)).unwrap().level == Level::Single {
+        if stats.get(&(x, i0_7)).unwrap().state == players_piece {
+            if stats.get(&(x, i0_7)).unwrap().level == Level::Single {
                 stats.insert(
-                    (x, i0_or_7),
+                    (x, i0_7),
                     Tile {
                         state: players_piece,
                         level: Level::Double,
@@ -658,7 +658,7 @@ fn check_if_promote_to_king(stats: &mut HashMap<(i8, i8), Tile>, whos_turn: &Pla
     }
 }
 
-// check if the game is over. 
+// check if the game is over.
 fn check_if_game_over(stats: &HashMap<(i8, i8), Tile>) -> bool {
     let mut player1s = true;
     let mut player2s = true;
@@ -740,9 +740,10 @@ fn sleep(s: u64) {
 }
 fn clear() {
     print!("\x1B[2J\x1B[1;1H");
+    ioflush();
 }
 fn ioflush() {
-    let _ = io::stdout().flush();
+    let _ = io::stdout().flush().expect("could not flush");
 }
 fn user_input() -> String {
     let mut ret = String::new();
@@ -750,8 +751,9 @@ fn user_input() -> String {
         .read_line(&mut ret)
         .expect("OwO what's this? Failed to read line");
     ret.pop();
-    
+
     if ret == "exit" {
+        clear();
         panic!("exit command used, crashed program");
     }
 
