@@ -19,14 +19,40 @@ enum PlayerTurn {
     P2,
 }
 
-fn main() {
-    let mut stats: HashMap<(u8, u8), Tile> = HashMap::new();
+const X_LEN = 8;
+const Y_LEN = 8;
 
-    stats.insert((0, 0), Tile::P1(Stack::Single));
-    stats.insert((1, 0), Tile::P2(Stack::Double));
-    stats.insert((2, 0), Tile::Emp);
+impl Tile {
+    fn init_fill_hashmap(stats: &mut HashMap<(u8, u8), Tile>) {
+        for y in 1..X_LEN {
+            for x in 1..X_LEN {
+                stats.insert(
+                    (x, y),
+                    if ((x + (y % 2)) % 2) == 1 {
+                        match y {
+                            1..=3 => Tile::P1(Stack::Single),
+                            6..=8 => Tile::P2(Stack::Single),
+                            _ => Tile::Emp,
+                        }
+                    } else {
+                        Tile::Emp,
+                    }
+                )
+            }
+        }
+    }
+}
+
+fn main() {
+
+    introduction();
+
+    let mut stats: HashMap<(u8, u8), Tile> = HashMap::new();
+    
+    Tile::init_fill_hashmap(&mut stats);
+
     println!(
-        "{:#?}\n{:#?}",
+        "test: {:#?}\n{:#?}",
         match stats.get(&(0, 0)) {
             None => panic!("OwO whats this? Failed to .get() stats"),
             Some(i) => i,
@@ -34,10 +60,14 @@ fn main() {
         stats,
     );
     //stats.get(&(0, 0)).unwrap().init_fill(&mut stats);
-    Tile::update(&mut stats, (2, 3), &Tile::P1(Stack::Double));
-    stats.insert((4, 4), Tile::Emp);
+    // Tile::update(&mut stats, (2, 3), &Tile::P1(Stack::Double));
+    // stats.insert((4, 4), Tile::Emp);
     
     println!("{:#?}", stats);
+}
+
+fn introduction() {
+    
 }
 
 impl Tile {
