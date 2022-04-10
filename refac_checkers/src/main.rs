@@ -19,8 +19,8 @@ enum Stack {
 
 #[derive(Debug, PartialEq)]
 enum PlayerTurn {
-    P1,
-    P2,
+    Player1,
+    Player2,
 }
 
 #[derive(Debug, PartialEq)]
@@ -76,8 +76,8 @@ impl Tile {
 impl PlayerTurn {
     fn change(&mut self) {
         match self {
-            PlayerTurn::P1 => *self = PlayerTurn::P2,
-            PlayerTurn::P2 => *self = PlayerTurn::P1,
+            PlayerTurn::Player1 => *self = PlayerTurn::Player2,
+            PlayerTurn::Player2 => *self = PlayerTurn::Player1,
         }
     }
 }
@@ -91,19 +91,11 @@ fn main() {
     let mut stats: HashMap<(u8, u8), Tile> = HashMap::new();
     Tile::init_fill_hashmap(&mut stats);
 
-    // debug: test
-    Tile::change_tile_state(&mut stats, (2, 1), Tile::Emp);
-    println!("{:#?}", stats);
-    print_board(&stats);
-
-    // Things to consider:
-    // enter pressed in another turn
-    // esc pressed in second coordinate input
-
     // set user-turn (enum)
-    let mut current_player = PlayerTurn::P1;
+    let mut current_player = PlayerTurn::Player1;
     let mut is_another_turn = false;
     'outer: loop {
+        clear();
         print_board(&stats);
         let mut vec_coords = Vec::new();
 
@@ -112,6 +104,7 @@ fn main() {
             let returned_option_enum = input_coords(&mut vec_coords);
 
             match returned_option_enum {
+                Ok(Norm) => (), // leave blank?
                 Ok(End) => {
                     if is_another_turn {
                         current_player.change();
@@ -127,7 +120,6 @@ fn main() {
                 Ok(Retype) => {
                     continue 'outer;
                 }
-                Ok(Norm) => (), // leave blank?
                 Err(e) => {
                     error_code(e);
                     sleep(2);
@@ -136,9 +128,17 @@ fn main() {
             }
         }
 
-        if logic_check() {
-            logic_move();
+        if logic_check(&stats, &vec_coords, &current_player) {
+            if let is_another_turn = logic_move(&mut stats) {
+
+            }
+        } else {
+            error_code(Error::InvalidCoordinates);
         }
+
+        check_if_promote_to_king(&mut stats);
+
+
         // logic check
         // logic implement
         // check if promote to king
@@ -319,17 +319,17 @@ enum Error {
     InputSize,
     InputContainsChar,
     InvalidNumber,
+    InvalidCoordinates,
 }
 
 fn error_code(e: Error) {
     let error_to_print = match e {
-        Error::InputErr(i) => {
-            format!("|=> Error: {} => can only be 2 or 4 numbers.", i)
-        }
-        Error::NoInput => {
-            format!("|=> Error: No input provided")
-        }
-        _ => "Error".to_string(),
+        Error::InputErr(i) => format!("|=> Error: {} => can only be 2 or 4 numbers.", i),
+        Error::NoInput => "|=> Error: No input provided".to_string(),
+        Error::InputSize => "|=> Error: Too many arguments".to_string(),
+        Error::InputContainsChar => "|=> Error: Input contains non-numbers".to_string(),
+        Error::InvalidNumber => "|=> Error: Invalid numbers".to_string(),
+        Error::InvalidCoordinates => "|=> Error: InvalidCoordinates".to_string(),
     };
 
     // useful forum:
@@ -341,6 +341,134 @@ fn error_code(e: Error) {
     for _ in 0..error_to_print.chars().count() {
         printf!("-");
     }
+}
+
+fn logic_check(
+    stats: &HashMap<(u8, u8), Tile>,
+    coords: &Vec<u8>,
+    turn: &PlayerTurn,
+) -> bool {
+
+    // checks if the beginning tile contains the current player's piece
+    match *turn {
+        PlayerTurn::Player1 => {
+            match *stats.get(&(coords[1], coords[2])).unwrap() {
+                Tile::P1(_) => (),
+                _ => return false,
+            }
+        }
+        PlayerTurn::Player2 => {
+            match *stats.get(&(coords[1], coords[2])).unwrap() {
+                Tile::P2(_) => (),
+                _ => return false,
+            }
+        }
+    }
+
+    // checks if the destination tile is empty
+    match *stats.get(&(coords[3], coords[4])).unwrap() {
+        Tile::Emp => (),
+        _ => return false,
+    }
+
+
+    // the following is copied and pasted from structs
+
+
+
+
+
+
+
+
+    // check if the movement in the y-direction is appropriate.
+    let mut check_for_capture = false;
+    match whos_turn {
+        &PlayerTurn::P1 => match stats.get(&(*a, *b)).unwrap().level {
+            Level::Single => match d - b {
+                1 => {}
+                2 => check_for_capture = true,
+                _ => return false,
+            },
+            Level::Double => match d - b {
+                1 | -1 => {}
+                2 | -2 => check_for_capture = true,
+                _ => return false,
+            },
+            Level::Emp => {
+                panic!("error occurred at logic test 2.0");
+            }
+        },
+        &PlayerTurn::P2 => match stats.get(&(*a, *b)).unwrap().level {
+            Level::Single => match d - b {
+                -1 => {}
+                -2 => check_for_capture = true,
+                _ => return false,
+            },
+            Level::Double => match d - b {
+                1 | -1 => {}
+                2 | -2 => check_for_capture = true,
+                _ => return false,
+            },
+            Level::Emp => {
+                panic!("error occurred at logic test 2.1");
+            }
+        },
+    }
+
+    // check if the movement in the x direction is appropriate, relative
+    // to the y.
+    match d - b {
+        1 | -1 => match c - a {
+            1 | -1 => {}
+            _ => return false,
+        },
+        2 | -2 => match c - a {
+            2 | -2 => {}
+            _ => return false,
+        },
+        _ => return false,
+    }
+
+    // if the piece moves 2 spaces diagonally, then check what it jumped over.
+    // if it jumped over an empty space or your own piece, then return false.
+    if check_for_capture {
+        match stats.get(&((a + c) / 2, (b + d) / 2)).unwrap().state {
+            Occupancy::Emp => return false,
+            Occupancy::P1 => {
+                if *whos_turn == PlayerTurn::P1 {
+                    return false;
+                }
+            }
+            Occupancy::P2 => {
+                if *whos_turn == PlayerTurn::P2 {
+                    return false;
+                }
+            }
+        }
+    }
+
+
+
+
+
+
+
+    true
+}
+
+fn logic_move(stats: &mut HashMap<(u8, u8), Tile>) -> bool {
+
+    true
+}
+
+fn check_if_promote_to_king(stats: &mut HashMap<(u8, u8), Tile>) {
+
+}
+
+fn check_if_game_over(stats: &HashMap<(u8, u8), Tile>) -> bool {
+
+    false
 }
 
 // prints the UI/board according to HashMap "stats"
