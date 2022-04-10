@@ -22,6 +22,13 @@ enum PlayerTurn {
     P2,
 }
 
+#[derive(Debug, PartialEq)]
+enum InputReturn {
+    VecCoords(Vec<u8>),
+    End,
+    Retype,
+}
+
 const X_LEN: u8 = 8;
 const Y_LEN: u8 = 8;
 
@@ -78,12 +85,18 @@ fn main() {
 
 
     // set user-turn (enum)
-    //
+    let mut current_player = PlayerTurn::P1;
+    let mut is_another_turn = false;
     'outer: loop {
+        let mut vec_coords = Vec::new();
         loop {
             ////maybe have little in this loop, most in outer?
             // print board
             // receive user input (if not full, two)
+            //      (enter pressed in another turn?) (esc pressed in coord input?)
+            // vvv For input_coords(), print the print statements out of the loop,
+            //  so you don't need to push whos_turn and stuff (keep it simple)
+            vec_coords = input_coords();
             // logic check
             // logic implement
             // check if promote to king
@@ -91,6 +104,7 @@ fn main() {
             // (exit loop if player captured a piece?)
         }
         // change turn
+
     }
 }
 
@@ -130,8 +144,6 @@ fn introduction() {
     clear();
     intro_scripts("menu");
     loop {
-        print!("\n\n\n\nCommand: ");
-        ioflush();
         let uwu = user_input();
         clear();
         match &uwu[..] {
@@ -144,7 +156,7 @@ fn introduction() {
 fn intro_scripts(input: &str) {
     clear();
     match input {
-        "" | "s" | "start" => panic!("it should never pass through here"),
+        "" | "s" | "start" => panic!("Error: it should never pass through here"),
         "m" | "menu" => println!(
             "{}{}{}{}{}{}{}{}{}{}",
             "\n\n\n\tcli-checkers\n\n\n",
@@ -216,6 +228,12 @@ fn intro_scripts(input: &str) {
             input, "See the list of available commands: \"c\" | \"commands\""
         ),
     }
+    print!("\n\n\n\nCommand: ");
+    ioflush();
+}
+
+fn input_coords() -> Vec<u8> {
+    vec![1, 2, 3]
 }
 
 
