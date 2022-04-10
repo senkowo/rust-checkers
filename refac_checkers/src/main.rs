@@ -1,7 +1,8 @@
 // a beginner project in rust
 
-use std::io::{self, Write};
 use std::collections::HashMap;
+use std::convert::TryInto;
+use std::io::{self, Write};
 
 #[derive(Debug, PartialEq)]
 enum Tile {
@@ -23,11 +24,23 @@ enum PlayerTurn {
 }
 
 #[derive(Debug, PartialEq)]
-enum InputReturn {
-    VecCoords(Vec<u8>),
+enum OkInput {
+    Norm,
     End,
     Retype,
 }
+
+// scuffed attempt at making a custom macro (macros are hard umu).
+// the macro "print!()" requires a "stdout().flush()" afterwards to work
+// properly, so making a macro that does both is nice.
+macro_rules! printf {
+    ($($str:expr),*) => {{
+        print!($($str),*);
+        ioflush()
+    }};
+}
+
+type InputResult = Result<OkInput, Error>;
 
 const X_LEN: u8 = 8;
 const Y_LEN: u8 = 8;
@@ -53,14 +66,19 @@ impl Tile {
         }
     }
     // changes the given tile state to another
-    fn change_tile_state(
-        stats: &mut HashMap<(u8, u8), Tile>,
-        location: (u8, u8),
-        variant: Tile
-    ) {
+    fn change_tile_state(stats: &mut HashMap<(u8, u8), Tile>, location: (u8, u8), variant: Tile) {
         // the first expression returns a mutable reference to the value of the
         // given HashMap key, which is overwritten by Tile instance "variant"
         *stats.get_mut(&location).expect("OwO whats this?") = variant;
+    }
+}
+
+impl PlayerTurn {
+    fn change(&mut self) {
+        match self {
+            PlayerTurn::P1 => *self = PlayerTurn::P2,
+            PlayerTurn::P2 => *self = PlayerTurn::P1,
+        }
     }
 }
 
@@ -78,33 +96,55 @@ fn main() {
     println!("{:#?}", stats);
     print_board(&stats);
 
-
     // Things to consider:
     // enter pressed in another turn
     // esc pressed in second coordinate input
-
 
     // set user-turn (enum)
     let mut current_player = PlayerTurn::P1;
     let mut is_another_turn = false;
     'outer: loop {
+        print_board(&stats);
         let mut vec_coords = Vec::new();
-        loop {
-            ////maybe have little in this loop, most in outer?
-            // print board
-            // receive user input (if not full, two)
-            //      (enter pressed in another turn?) (esc pressed in coord input?)
-            // vvv For input_coords(), print the print statements out of the loop,
-            //  so you don't need to push whos_turn and stuff (keep it simple)
-            vec_coords = input_coords();
-            // logic check
-            // logic implement
-            // check if promote to king
-            // check if game over
-            // (exit loop if player captured a piece?)
-        }
-        // change turn
 
+        while vec_coords.len() != 4 {
+
+            let returned_option_enum = input_coords(&mut vec_coords);
+
+            match returned_option_enum {
+                Ok(End) => {
+                    if is_another_turn {
+                        current_player.change();
+                        is_another_turn = false;
+                        continue 'outer;
+                    } else {
+                        // if no input and isn't "another_turn" return err(NoInput)
+                        error_code(Error::NoInput);
+                        sleep(2);
+                        continue 'outer;
+                    }
+                }
+                Ok(Retype) => {
+                    continue 'outer;
+                }
+                Ok(Norm) => (), // leave blank?
+                Err(e) => {
+                    error_code(e);
+                    sleep(2);
+                    continue 'outer;
+                }
+            }
+        }
+
+        if logic_check() {
+            logic_move();
+        }
+        // logic check
+        // logic implement
+        // check if promote to king
+        // check if game over
+        // (exit loop if player captured a piece?)
+        // change turn
     }
 }
 
@@ -228,17 +268,80 @@ fn intro_scripts(input: &str) {
             input, "See the list of available commands: \"c\" | \"commands\""
         ),
     }
-    print!("\n\n\n\nCommand: ");
-    ioflush();
+    printf!("\n\n\n\nCommand: ");
 }
 
-fn input_coords() -> Vec<u8> {
-    vec![1, 2, 3]
+fn input_coords(vec_coords: &mut Vec<u8>) -> InputResult {
+    // requests user input
+    let input = user_input();
+
+    if input == "" || input == "end" {
+        return Ok(OkInput::End);
+    }
+    if input == "esc" {
+        return Ok(OkInput::Retype);
+    }
+
+    // creates a vec of chars from input. Then, it goes through all the chars
+    // and converts them into int (u32). Then, it is converted to u8, so it
+    // can be added to vec_coords.
+    // can i simplify this into a long string of methods? impl Option ?
+    let input_as_chars: Vec<char> = input.chars().collect();
+    for v in input_as_chars.iter() {
+        match v.to_digit(10) {
+            Some(i) => vec_coords.push(
+                match u32_to_u8(i) {
+                    Ok(as_u8) => as_u8,
+                    Err(conv_err) => return Err(conv_err),
+                },
+            ),
+            None => return Err(Error::InputContainsChar),
+        };
+    }
+    println!("{:#?}", vec_coords); //debug
+
+    // check if vec_coords.len() is 2 or 4. If not, return error (incorrect size)
+    match vec_coords.len() {
+        2 | 4 => (),
+        _ => {
+            return Err(Error::InputSize);
+        }
+    }
+
+    //InputReturn::VecCoords(vec![1])
+    Ok(OkInput::Norm)
 }
 
+#[derive(Debug, PartialEq)]
+enum Error {
+    InputErr(usize),
+    NoInput,
+    InputSize,
+    InputContainsChar,
+    InvalidNumber,
+}
 
+fn error_code(e: Error) {
+    let error_to_print = match e {
+        Error::InputErr(i) => {
+            format!("|=> Error: {} => can only be 2 or 4 numbers.", i)
+        }
+        Error::NoInput => {
+            format!("|=> Error: No input provided")
+        }
+        _ => "Error".to_string(),
+    };
 
-
+    // useful forum:
+    // https://users.rust-lang.org/t/is-there-a-better-way-to-loop-n-times/22721/9
+    for _ in 0..error_to_print.chars().count() {
+        printf!("-");
+    }
+    printf!("\n{}\n", error_to_print);
+    for _ in 0..error_to_print.chars().count() {
+        printf!("-");
+    }
+}
 
 // prints the UI/board according to HashMap "stats"
 fn print_board(stats: &HashMap<(u8, u8), Tile>) {
@@ -246,7 +349,7 @@ fn print_board(stats: &HashMap<(u8, u8), Tile>) {
     println!("    ,______ ______ ______ ______ ______ ______ ______ ______,");
     for y in (1..=Y_LEN).rev() {
         for s in 0..2 {
-            print!(
+            printf!(
                 "  {} |",
                 if s == 1 {
                     y.to_string()
@@ -254,19 +357,17 @@ fn print_board(stats: &HashMap<(u8, u8), Tile>) {
                     String::from(" ")
                 }
             );
-            ioflush();
             for x in 1..=X_LEN {
                 for (key, value) in stats {
                     // "*k" or "&(x, y)"???
                     if *key == (x, y) {
                         match value {
-                            Tile::P1(Single) => print!(" OOOO |"),
-                            Tile::P1(Double) => print!(" 0KK0 |"),
-                            Tile::P2(Single) => print!(" //// |"),
-                            Tile::P2(Double) => print!(" \\KK\\ |"),
-                            Tile::Emp => print!("      |"),
+                            Tile::P1(Single) => printf!(" OOOO |"),
+                            Tile::P1(Double) => printf!(" 0KK0 |"),
+                            Tile::P2(Single) => printf!(" //// |"),
+                            Tile::P2(Double) => printf!(" \\KK\\ |"),
+                            Tile::Emp => printf!("      |"),
                         }
-                        ioflush();
                     }
                 }
             }
@@ -286,11 +387,16 @@ fn sleep(s: u64) {
     std::thread::sleep(std::time::Duration::from_secs(s));
 }
 fn clear() {
-    print!("\x1B[2J\x1B[1;1H");
-    ioflush();
+    printf!("\x1B[2J\x1B[1;1H");
 }
 fn ioflush() {
     let _ = io::stdout().flush().expect("could not flush");
+}
+fn u32_to_u8(x: u32) -> Result<u8, Error> {
+    match x.try_into() {
+        Ok(i) => Ok(i),
+        Err(_) => Err(Error::InvalidNumber),
+    }
 }
 fn user_input() -> String {
     let mut ret = String::new();
