@@ -460,15 +460,15 @@ fn logic_move(stats: &mut HashMap<(u8, u8), Tile>, coords: &Vec<u8>) -> bool {
 
     // first, create a new piece of the same type as the initial in the 
     // destination coordinate.
-    Tile::change_tile_state(&mut stats, (x2, y2), *stats.get(&(x1, y1)).unwrap());
+    Tile::change_tile_state(stats, (x2, y2), stats.get(&(x1, y1)).unwrap());
 
     // then, make the initial piece an empty tile.
-    Tile::change_tile_state(&mut stats, (x1, y1), Tile::Emp);
+    Tile::change_tile_state(stats, (x1, y1), Tile::Emp);
 
     // if it jumps over a piece, then make it an empty tile.
     match signed(y2) - signed(y1) {
         2 | -2 => {
-            Tile::change_tile_state(&mut stats, ( (x1+x2)/2, (y1+y2)/2 ), Tile::Emp);
+            Tile::change_tile_state(stats, ( (x1+x2)/2, (y1+y2)/2 ), Tile::Emp);
             // return true if jumps over piece
             true
         },
@@ -480,11 +480,11 @@ fn logic_move(stats: &mut HashMap<(u8, u8), Tile>, coords: &Vec<u8>) -> bool {
 fn check_if_promote_to_king(stats: &mut HashMap<(u8, u8), Tile>) {
 
     for x in 1..=X_LEN {
-        if *stats.get(&(x, 8)).unwrap() == Tile::P1(Single) {
-            Tile::change_tile_state(&mut stats, (x, 8), Tile::P1(Double));
+        if *stats.get(&(x, 8)).unwrap() == Tile::P1(Stack::Single) {
+            Tile::change_tile_state(stats, (x, 8), Tile::P1(Stack::Double));
         }
-        if *stats.get(&(x, 1)).unwrap() == Tile::P2(Single) {
-            Tile::change_tile_state(&mut stats, (x, 1), Tile::P2(Double));
+        if *stats.get(&(x, 1)).unwrap() == Tile::P2(Stack::Single) {
+            Tile::change_tile_state(stats, (x, 1), Tile::P2(Stack::Double));
         }
     }
 }
