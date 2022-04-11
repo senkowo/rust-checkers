@@ -86,12 +86,17 @@ fn main() {
     // runs the init menu system
     introduction();
 
-    // creates a hashmap that contains information for every tile on the
-    // checkerboard respectively (e.g. player occupation and piece type)
+    // HashMap "stats" stores a key of tuple (i8, i8), which represents the
+    // x and y coordinates of a given tile on the checkerboard. For the value
+    // of each respective key, there is an instance of enum "Tile", which
+    // stores information about whether there is a piece on a given tile and
+    // which player it belongs to (the variants are: P1(Single/Double),
+    // P2(Single/Double), Emp).
     let mut stats: HashMap<(u8, u8), Tile> = HashMap::new();
     Tile::init_fill_hashmap(&mut stats);
 
-    // set user-turn (enum)
+    // the loop below is the main process that repeats for the duration of
+    // the game.
     let mut current_player = PlayerTurn::Player1;
     let mut is_another_turn = false;
     'outer: loop {
@@ -100,12 +105,33 @@ fn main() {
         let mut vec_coords = Vec::new();
 
         while vec_coords.len() != 4 {
+            // dialogue to play before input_coords
+            if is_another_turn {
+                printf!(
+                    "\n{} goes again. Press \"enter\" without arguments to end turn.",
+                    match current_player {
+                        PlayerTurn::Player1 => "Player 1",
+                        PlayerTurn::Player2 => "Player 2",
+                    }
+                );
+            }
+            printf!("\n{}: {}",
+                match current_player {
+                    PlayerTurn::Player1 => "Player 1",
+                    PlayerTurn::Player2 => "Player 2",
+                },
+                match vec_coords.len() {
+                    0 => "Enter move coordinates\n\t(e.g. [x, y] : \"12:enter:23\" or \"1223\"): ",
+                    2 => "Input destination coordinates\n\t(e.g. \"23\") (Note: enter \"esc\" to cancel): ",
+                    _ => panic!("OwO whats this? pls fix dis devewopew!"),
+                }
+            );
 
             let returned_option_enum = input_coords(&mut vec_coords);
 
             match returned_option_enum {
-                Ok(Norm) => (), // leave blank?
-                Ok(End) => {
+                Ok(OkInput::Norm) => (), // leave blank?
+                Ok(OkInput::End) => {
                     if is_another_turn {
                         current_player.change();
                         is_another_turn = false;
@@ -117,7 +143,7 @@ fn main() {
                         continue 'outer;
                     }
                 }
-                Ok(Retype) => {
+                Ok(OkInput::Retype) => {
                     continue 'outer;
                 }
                 Err(e) => {
@@ -130,7 +156,7 @@ fn main() {
 
         // logic_check returns true if the movement could be performed.
         if logic_check(&stats, &vec_coords, &current_player) {
-            // logic_move returns whether an enemy piece was captured and if the 
+            // logic_move returns whether an enemy piece was captured and if the
             // player should play another turn.
             if logic_move(&mut stats, &vec_coords) {
                 is_another_turn = true;
@@ -297,16 +323,13 @@ fn input_coords(vec_coords: &mut Vec<u8>) -> InputResult {
     let input_as_chars: Vec<char> = input.chars().collect();
     for v in input_as_chars.iter() {
         match v.to_digit(10) {
-            Some(i) => vec_coords.push(
-                match u32_to_u8(i) {
-                    Ok(as_u8) => as_u8,
-                    Err(conv_err) => return Err(conv_err),
-                },
-            ),
+            Some(i) => vec_coords.push(match u32_to_u8(i) {
+                Ok(as_u8) => as_u8,
+                Err(conv_err) => return Err(conv_err),
+            }),
             None => return Err(Error::InputContainsChar),
         };
     }
-    println!("{:#?}", vec_coords); //debug
 
     // check if vec_coords.len() is 2 or 4. If not, return error (incorrect size)
     match vec_coords.len() {
@@ -322,7 +345,6 @@ fn input_coords(vec_coords: &mut Vec<u8>) -> InputResult {
 
 #[derive(Debug, PartialEq)]
 enum Error {
-    InputErr(usize),
     NoInput,
     InputSize,
     InputContainsChar,
@@ -332,16 +354,14 @@ enum Error {
 
 fn error_code(e: Error) {
     let error_to_print = match e {
-        Error::InputErr(i) => format!("|=> Error: {} => can only be 2 or 4 numbers.", i),
         Error::NoInput => "|=> Error: No input provided".to_string(),
-        Error::InputSize => "|=> Error: Too many arguments".to_string(),
+        Error::InputSize => "|=> Error: Too many or too little arguments".to_string(),
         Error::InputContainsChar => "|=> Error: Input contains non-numbers".to_string(),
         Error::InvalidNumber => "|=> Error: Invalid numbers".to_string(),
         Error::InvalidCoordinates => "|=> Error: InvalidCoordinates".to_string(),
     };
 
     // useful forum:
-    // https://users.rust-lang.org/t/is-there-a-better-way-to-loop-n-times/22721/9
     for _ in 0..error_to_print.chars().count() {
         printf!("-");
     }
@@ -351,28 +371,19 @@ fn error_code(e: Error) {
     }
 }
 
-fn logic_check(
-    stats: &HashMap<(u8, u8), Tile>,
-    coords: &Vec<u8>,
-    turn: &PlayerTurn,
-) -> bool {
-
-    let (x1, y1, x2, y2) = (coords[1], coords[2], coords[3], coords[4]);
+fn logic_check(stats: &HashMap<(u8, u8), Tile>, coords: &Vec<u8>, turn: &PlayerTurn) -> bool {
+    let (x1, y1, x2, y2) = (coords[0], coords[1], coords[2], coords[3]);
 
     // checks if the beginning tile contains the current player's piece
     match *turn {
-        PlayerTurn::Player1 => {
-            match *stats.get(&(x1, y1)).unwrap() {
-                Tile::P1(_) => (),
-                _ => return false,
-            }
-        }
-        PlayerTurn::Player2 => {
-            match *stats.get(&(x1, y1)).unwrap() {
-                Tile::P2(_) => (),
-                _ => return false,
-            }
-        }
+        PlayerTurn::Player1 => match *stats.get(&(x1, y1)).unwrap() {
+            Tile::P1(_) => (),
+            _ => return false,
+        },
+        PlayerTurn::Player2 => match *stats.get(&(x1, y1)).unwrap() {
+            Tile::P2(_) => (),
+            _ => return false,
+        },
     }
 
     // checks if the destination tile is empty
@@ -386,12 +397,12 @@ fn logic_check(
     let mut need_to_check_for_capture = false;
     match *turn {
         PlayerTurn::Player1 => match stats.get(&(x1, y1)).unwrap() {
-            Tile::P1(Single) => match signed(y2) - signed(y1) {
+            Tile::P1(Stack::Single) => match signed(y2) - signed(y1) {
                 1 => (),
                 2 => need_to_check_for_capture = true,
                 _ => return false,
-            }
-            Tile::P1(Double) => match signed(y2) - signed(y1) {
+            },
+            Tile::P1(Stack::Double) => match signed(y2) - signed(y1) {
                 1 | -1 => (),
                 2 | -2 => need_to_check_for_capture = true,
                 _ => return false,
@@ -399,14 +410,14 @@ fn logic_check(
             _ => {
                 panic!("Error: this should not happen");
             }
-        }
+        },
         PlayerTurn::Player2 => match stats.get(&(x1, y1)).unwrap() {
-            Tile::P2(Single) => match signed(y2) - signed(y1) {
+            Tile::P2(Stack::Single) => match signed(y2) - signed(y1) {
                 -1 => (),
                 -2 => need_to_check_for_capture = true,
                 _ => return false,
             },
-            Tile::P2(Double) => match signed(y2) - signed(y1) {
+            Tile::P2(Stack::Double) => match signed(y2) - signed(y1) {
                 1 | -1 => (),
                 2 | -2 => need_to_check_for_capture = true,
                 _ => return false,
@@ -414,7 +425,7 @@ fn logic_check(
             _ => {
                 panic!("Error: this should not happen");
             }
-        }
+        },
     }
 
     // check if the movement in the x-direction is appropriate relative
@@ -433,8 +444,8 @@ fn logic_check(
 
     // if "need_to_check_for_capture" is true, then the piece must move two
     // spaces. Because this is only possible if it jumps over a piece, this
-    // checks whether there is an enemy piece in between the initial and 
-    // destination tiles. 
+    // checks whether there is an enemy piece in between the initial and
+    // destination tiles.
     if need_to_check_for_capture {
         match *stats.get(&((x1 + x2) / 2, (y1 + y2) / 2)).unwrap() {
             Tile::Emp => return false,
@@ -458,15 +469,9 @@ fn logic_check(
 fn logic_move(stats: &mut HashMap<(u8, u8), Tile>, coords: &Vec<u8>) -> bool {
     let (x1, y1, x2, y2) = (coords[0], coords[1], coords[2], coords[3]);
 
-    // first, create a new piece of the same type as the initial in the 
+    // first, create a new piece of the same type as the initial in the
     // destination coordinate.
-    Tile::change_tile_state(
-        stats,
-        (x2, y2),
-        match stats.get(&(x1, y1)).unwrap() {
-            
-        }
-    );
+    Tile::change_tile_state(stats, (x2, y2), &stats.get(&(x1, y1)).unwrap().clone());
 
     // then, make the initial piece an empty tile.
     Tile::change_tile_state(stats, (x1, y1), &Tile::Emp);
@@ -474,17 +479,18 @@ fn logic_move(stats: &mut HashMap<(u8, u8), Tile>, coords: &Vec<u8>) -> bool {
     // if it jumps over a piece, then make it an empty tile.
     match signed(y2) - signed(y1) {
         2 | -2 => {
-            Tile::change_tile_state(stats, ( (x1+x2)/2, (y1+y2)/2 ), &Tile::Emp);
+            Tile::change_tile_state(stats, ((x1 + x2) / 2, (y1 + y2) / 2), &Tile::Emp);
             // return true if jumps over piece
             true
-        },
+        }
         // return false if doesn't jump over a piece
         _ => false,
     }
 }
 
 fn check_if_promote_to_king(stats: &mut HashMap<(u8, u8), Tile>) {
-
+    // goes through the furthest ends of the board and checks if an enemy pice
+    // exists in each respective row. If yes, promote it to a king.
     for x in 1..=X_LEN {
         if *stats.get(&(x, 8)).unwrap() == Tile::P1(Stack::Single) {
             Tile::change_tile_state(stats, (x, 8), &Tile::P1(Stack::Double));
@@ -496,8 +502,25 @@ fn check_if_promote_to_king(stats: &mut HashMap<(u8, u8), Tile>) {
 }
 
 fn check_if_game_over(stats: &HashMap<(u8, u8), Tile>) -> bool {
-
-    false
+    // goes through every tile on the board and if there are no P1 or P2 pieces,
+    // return true to end the game
+    let mut player1s = true;
+    let mut player2s = true;
+    for y in 1..=Y_LEN {
+        for x in 1..=X_LEN {
+            match stats.get(&(x, y)).unwrap() {
+                Tile::P1(_) => player1s = false,
+                Tile::P2(_) => player2s = false,
+                Tile::Emp => (),
+            }
+        }
+    }
+    // if either remains true, return yes: end game
+    if player1s == true || player2s == true {
+        true
+    } else {
+        false
+    }
 }
 
 // prints the UI/board according to HashMap "stats"
@@ -519,10 +542,10 @@ fn print_board(stats: &HashMap<(u8, u8), Tile>) {
                     // "*k" or "&(x, y)"???
                     if *key == (x, y) {
                         match value {
-                            Tile::P1(Single) => printf!(" OOOO |"),
-                            Tile::P1(Double) => printf!(" 0KK0 |"),
-                            Tile::P2(Single) => printf!(" //// |"),
-                            Tile::P2(Double) => printf!(" \\KK\\ |"),
+                            Tile::P1(Stack::Single) => printf!(" OOOO |"),
+                            Tile::P1(Stack::Double) => printf!(" 0KK0 |"),
+                            Tile::P2(Stack::Single) => printf!(" //// |"),
+                            Tile::P2(Stack::Double) => printf!(" \\KK\\ |"),
                             Tile::Emp => printf!("      |"),
                         }
                     }
