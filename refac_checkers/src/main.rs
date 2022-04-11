@@ -128,9 +128,14 @@ fn main() {
             }
         }
 
+        // logic_check returns true if the movement could be performed.
         if logic_check(&stats, &vec_coords, &current_player) {
-            if let is_another_turn = logic_move(&mut stats) {
-
+            // logic_move returns whether an enemy piece was captured and if the 
+            // player should play another turn.
+            if logic_move(&mut stats) {
+                is_another_turn = true;
+            } else {
+                is_another_turn = false;
             }
         } else {
             error_code(Error::InvalidCoordinates);
@@ -138,13 +143,9 @@ fn main() {
 
         check_if_promote_to_king(&mut stats);
 
-
-        // logic check
-        // logic implement
-        // check if promote to king
-        // check if game over
-        // (exit loop if player captured a piece?)
-        // change turn
+        if !(is_another_turn) {
+            current_player.change();
+        }
     }
 }
 
@@ -428,7 +429,7 @@ fn logic_check(
     // checks whether there is an enemy piece in between the initial and 
     // destination tiles. 
     if check_for_capture {
-        match stats.get(&((x1 + x2) / 2, (y1 + y2) / 2)).unwrap() {
+        match *stats.get(&((x1 + x2) / 2, (y1 + y2) / 2)).unwrap() {
             Tile::Emp => return false,
             Tile::P1(_) => {
                 if *turn == PlayerTurn::Player1 {
@@ -443,30 +444,10 @@ fn logic_check(
         }
     }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    
-
-
-
-
-
-
-    true
+    true // the default output if it survives all the checks
 }
 
+// if fn logic_check is true, execute/implement the action.
 fn logic_move(stats: &mut HashMap<(u8, u8), Tile>) -> bool {
 
     true
