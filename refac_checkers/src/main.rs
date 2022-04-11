@@ -349,16 +349,18 @@ fn logic_check(
     turn: &PlayerTurn,
 ) -> bool {
 
+    let (x1, y1, x2, y2) = (coords[1], coords[2], coords[3], coords[4]);
+
     // checks if the beginning tile contains the current player's piece
     match *turn {
         PlayerTurn::Player1 => {
-            match *stats.get(&(coords[1], coords[2])).unwrap() {
+            match *stats.get(&(x1, y1)).unwrap() {
                 Tile::P1(_) => (),
                 _ => return false,
             }
         }
         PlayerTurn::Player2 => {
-            match *stats.get(&(coords[1], coords[2])).unwrap() {
+            match *stats.get(&(x1, y1)).unwrap() {
                 Tile::P2(_) => (),
                 _ => return false,
             }
@@ -366,88 +368,96 @@ fn logic_check(
     }
 
     // checks if the destination tile is empty
-    match *stats.get(&(coords[3], coords[4])).unwrap() {
+    match *stats.get(&(x2, y2)).unwrap() {
         Tile::Emp => (),
         _ => return false,
     }
 
-
-    // the following is copied and pasted from structs
-
-
-
-
-
-
-
-
-    // check if the movement in the y-direction is appropriate.
-    let mut check_for_capture = false;
-    match whos_turn {
-        &PlayerTurn::P1 => match stats.get(&(*a, *b)).unwrap().level {
-            Level::Single => match d - b {
-                1 => {}
-                2 => check_for_capture = true,
+    // checks if the movement in the y-direction is appropriate and if
+    // move 2 spaces, set "need_to_check_for_capture" true.
+    let mut need_to_check_for_capture = false;
+    match *turn {
+        PlayerTurn::Player1 => match *stats.get(&(x1, y1)).unwrap() {
+            Tile::P1(Single) => match y2 - y1 {
+                1 => (),
+                2 => need_to_check_for_capture = true,
                 _ => return false,
-            },
-            Level::Double => match d - b {
-                1 | -1 => {}
-                2 | -2 => check_for_capture = true,
-                _ => return false,
-            },
-            Level::Emp => {
-                panic!("error occurred at logic test 2.0");
             }
-        },
-        &PlayerTurn::P2 => match stats.get(&(*a, *b)).unwrap().level {
-            Level::Single => match d - b {
-                -1 => {}
-                -2 => check_for_capture = true,
+            Tile::P1(Double) => match y2 - y1 {
+                1 | -1 => (),
+                2 | -2 => need_to_check_for_capture = true,
                 _ => return false,
             },
-            Level::Double => match d - b {
-                1 | -1 => {}
-                2 | -2 => check_for_capture = true,
-                _ => return false,
-            },
-            Level::Emp => {
-                panic!("error occurred at logic test 2.1");
+            Tile::Emp => {
+                panic!("Error: initial point is never Empty");
             }
-        },
+        }
+        PlayerTurn::Player2 => match *stats.get(&(x1, y1)).unwrap() {
+            Tile::P2(Single) => match y2 - y1 {
+                -1 => (),
+                -2 => need_to_check_for_capture = true,
+                _ => return false,
+            },
+            Tile::P2(Double) => match y2 - y1 {
+                1 | -1 => (),
+                2 | -2 => need_to_check_for_capture = true,
+                _ => return false,
+            },
+            Tile::Emp => {
+                panic!("Error: initial point is never Empty");
+            }
+        }
     }
 
-    // check if the movement in the x direction is appropriate, relative
+    // check if the movement in the x-direction is appropriate relative
     // to the y.
-    match d - b {
-        1 | -1 => match c - a {
-            1 | -1 => {}
+    match y2 - y1 {
+        1 | -1 => match x2 - x1 {
+            1 | -1 => (),
             _ => return false,
         },
-        2 | -2 => match c - a {
-            2 | -2 => {}
+        2 | -2 => match x2 - x1 {
+            2 | -2 => (),
             _ => return false,
         },
         _ => return false,
     }
 
-    // if the piece moves 2 spaces diagonally, then check what it jumped over.
-    // if it jumped over an empty space or your own piece, then return false.
+    // if "need_to_check_for_capture" is true, then the piece must move two
+    // spaces. Because this is only possible if it jumps over a piece, this
+    // checks whether there is an enemy piece in between the initial and 
+    // destination tiles. 
     if check_for_capture {
-        match stats.get(&((a + c) / 2, (b + d) / 2)).unwrap().state {
-            Occupancy::Emp => return false,
-            Occupancy::P1 => {
-                if *whos_turn == PlayerTurn::P1 {
+        match stats.get(&((x1 + x2) / 2, (y1 + y2) / 2)).unwrap() {
+            Tile::Emp => return false,
+            Tile::P1(_) => {
+                if *turn == PlayerTurn::Player1 {
                     return false;
                 }
             }
-            Occupancy::P2 => {
-                if *whos_turn == PlayerTurn::P2 {
+            Tile::P2(_) => {
+                if *turn == PlayerTurn::Player2 {
                     return false;
                 }
             }
         }
     }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
 
 
 
