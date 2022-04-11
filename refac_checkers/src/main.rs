@@ -32,7 +32,7 @@ enum OkInput {
 
 // scuffed attempt at making a custom macro (macros are hard umu).
 // the macro "print!()" requires a "stdout().flush()" afterwards to work
-// properly, so making a macro that does both is nice.
+// properly, so making a macro that does both ("printf!()") is nice.
 macro_rules! printf {
     ($($str:expr),*) => {{
         print!($($str),*);
@@ -132,17 +132,24 @@ fn main() {
         if logic_check(&stats, &vec_coords, &current_player) {
             // logic_move returns whether an enemy piece was captured and if the 
             // player should play another turn.
-            if logic_move(&mut stats) {
+            if logic_move(&mut stats, &vec_coords) {
                 is_another_turn = true;
             } else {
                 is_another_turn = false;
             }
         } else {
             error_code(Error::InvalidCoordinates);
+            sleep(2);
+            continue 'outer;
         }
 
+        // checks if a piece needs to be promoted to king.
         check_if_promote_to_king(&mut stats);
 
+        // checks if the game should end.
+        check_if_game_over(&stats);
+
+        // if current player did not capture an enemy piece this turn, change.
         if !(is_another_turn) {
             current_player.change();
         }
@@ -378,46 +385,46 @@ fn logic_check(
     // move 2 spaces, set "need_to_check_for_capture" true.
     let mut need_to_check_for_capture = false;
     match *turn {
-        PlayerTurn::Player1 => match *stats.get(&(x1, y1)).unwrap() {
-            Tile::P1(Single) => match y2 - y1 {
+        PlayerTurn::Player1 => match stats.get(&(x1, y1)).unwrap() {
+            Tile::P1(Single) => match signed(y2) - signed(y1) {
                 1 => (),
                 2 => need_to_check_for_capture = true,
                 _ => return false,
             }
-            Tile::P1(Double) => match y2 - y1 {
+            Tile::P1(Double) => match signed(y2) - signed(y1) {
                 1 | -1 => (),
                 2 | -2 => need_to_check_for_capture = true,
                 _ => return false,
             },
-            Tile::Emp => {
-                panic!("Error: initial point is never Empty");
+            _ => {
+                panic!("Error: this should not happen");
             }
         }
-        PlayerTurn::Player2 => match *stats.get(&(x1, y1)).unwrap() {
-            Tile::P2(Single) => match y2 - y1 {
+        PlayerTurn::Player2 => match stats.get(&(x1, y1)).unwrap() {
+            Tile::P2(Single) => match signed(y2) - signed(y1) {
                 -1 => (),
                 -2 => need_to_check_for_capture = true,
                 _ => return false,
             },
-            Tile::P2(Double) => match y2 - y1 {
+            Tile::P2(Double) => match signed(y2) - signed(y1) {
                 1 | -1 => (),
                 2 | -2 => need_to_check_for_capture = true,
                 _ => return false,
             },
-            Tile::Emp => {
-                panic!("Error: initial point is never Empty");
+            _ => {
+                panic!("Error: this should not happen");
             }
         }
     }
 
     // check if the movement in the x-direction is appropriate relative
     // to the y.
-    match y2 - y1 {
-        1 | -1 => match x2 - x1 {
+    match signed(y2) - signed(y1) {
+        1 | -1 => match signed(x2) - signed(x1) {
             1 | -1 => (),
             _ => return false,
         },
-        2 | -2 => match x2 - x1 {
+        2 | -2 => match signed(x2) - signed(x1) {
             2 | -2 => (),
             _ => return false,
         },
@@ -428,7 +435,7 @@ fn logic_check(
     // spaces. Because this is only possible if it jumps over a piece, this
     // checks whether there is an enemy piece in between the initial and 
     // destination tiles. 
-    if check_for_capture {
+    if need_to_check_for_capture {
         match *stats.get(&((x1 + x2) / 2, (y1 + y2) / 2)).unwrap() {
             Tile::Emp => return false,
             Tile::P1(_) => {
@@ -448,13 +455,38 @@ fn logic_check(
 }
 
 // if fn logic_check is true, execute/implement the action.
-fn logic_move(stats: &mut HashMap<(u8, u8), Tile>) -> bool {
+fn logic_move(stats: &mut HashMap<(u8, u8), Tile>, coords: &Vec<u8>) -> bool {
+    let (x1, y1, x2, y2) = (coords[0], coords[1], coords[2], coords[3]);
 
-    true
+    // first, create a new piece of the same type as the initial in the 
+    // destination coordinate.
+    Tile::change_tile_state(&mut stats, (x2, y2), *stats.get(&(x1, y1)).unwrap());
+
+    // then, make the initial piece an empty tile.
+    Tile::change_tile_state(&mut stats, (x1, y1), Tile::Emp);
+
+    // if it jumps over a piece, then make it an empty tile.
+    match signed(y2) - signed(y1) {
+        2 | -2 => {
+            Tile::change_tile_state(&mut stats, ( (x1+x2)/2, (y1+y2)/2 ), Tile::Emp);
+            // return true if jumps over piece
+            true
+        },
+        // return false if doesn't jump over a piece
+        _ => false,
+    }
 }
 
 fn check_if_promote_to_king(stats: &mut HashMap<(u8, u8), Tile>) {
 
+    for x in 1..=X_LEN {
+        if *stats.get(&(x, 8)).unwrap() == Tile::P1(Single) {
+            Tile::change_tile_state(&mut stats, (x, 8), Tile::P1(Double));
+        }
+        if *stats.get(&(x, 1)).unwrap() == Tile::P2(Single) {
+            Tile::change_tile_state(&mut stats, (x, 1), Tile::P2(Double));
+        }
+    }
 }
 
 fn check_if_game_over(stats: &HashMap<(u8, u8), Tile>) -> bool {
@@ -516,6 +548,9 @@ fn u32_to_u8(x: u32) -> Result<u8, Error> {
         Ok(i) => Ok(i),
         Err(_) => Err(Error::InvalidNumber),
     }
+}
+fn signed(x: u8) -> i8 {
+    x.try_into().unwrap()
 }
 fn user_input() -> String {
     let mut ret = String::new();
