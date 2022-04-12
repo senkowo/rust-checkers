@@ -312,7 +312,9 @@ fn intro_scripts(input: &str) {
 
 fn input_coords(vec_coords: &mut Vec<u8>) -> InputResult {
     // requests user input
-    let input = user_input();
+    let input: String = user_input().trim().parse().unwrap();
+    // filters out all chars that are not numbers
+    let input: String = input.chars().filter(|c| c.is_digit(10)).collect();
 
     if input == "" || input == "end" {
         return Ok(OkInput::End);
