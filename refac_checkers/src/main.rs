@@ -368,11 +368,11 @@ fn error_code(e: Error) {
         Error::InvalidCoordinates => "|=> Error: Invalid Coordinates".to_string(),
     };
 
-    for _ in 0..error_to_print.chars().count() {
+    for _ in 0..=error_to_print.chars().count() {
         printf!("-");
     }
     printf!("\n{}\n", error_to_print);
-    for _ in 0..error_to_print.chars().count() {
+    for _ in 0..=error_to_print.chars().count() {
         printf!("-");
     }
 }
@@ -476,7 +476,7 @@ fn logic_check(stats: &HashMap<(u8, u8), Tile>, coords: &[u8], turn: &PlayerTurn
     true // the default output if it survives all the checks
 }
 
-// if fn logic_check is true, execute/implement the action.
+// if fn logic_check is true, execute/implement the action with logic_move.
 fn logic_move(stats: &mut HashMap<(u8, u8), Tile>, coords: &[u8]) -> bool {
     let (x1, y1, x2, y2) = (coords[0], coords[1], coords[2], coords[3]);
 
@@ -500,8 +500,8 @@ fn logic_move(stats: &mut HashMap<(u8, u8), Tile>, coords: &[u8]) -> bool {
 }
 
 fn check_if_promote_to_king(stats: &mut HashMap<(u8, u8), Tile>) {
-    // goes through the furthest ends of the board and checks if an enemy pice
-    // exists in each respective row. If yes, promote it to a king.
+    // goes through the furthest ends of the board and checks if an enemy piece
+    // exists in both respective rows. If yes, promote it to a king.
     for x in 1..=X_LEN {
         if *stats.get(&(x, 8)).unwrap() == Tile::P1(Stack::Single) {
             Tile::change_tile_state(stats, (x, 8), &Tile::P1(Stack::Double));
@@ -578,7 +578,7 @@ fn clear() {
     printf!("\x1B[2J\x1B[1;1H");
 }
 fn ioflush() {
-    let _ = io::stdout().flush().expect("could not flush");
+    let _ = io::stdout().flush().expect("could not flush the thing");
 }
 fn u32_to_u8(x: u32) -> Result<u8, Error> {
     match x.try_into() {
