@@ -66,7 +66,7 @@ impl Tile {
             }
         }
     }
-    // changes the given tile state to another
+    // changes the given tile's state to another
     fn change_tile_state(stats: &mut HashMap<(u8, u8), Tile>, location: (u8, u8), variant: &Tile) {
         // the first expression returns a mutable reference to the value of the
         // given HashMap key, which is overwritten by Tile instance "variant"
@@ -303,8 +303,8 @@ fn intro_scripts(input: &str) {
         "OwO" | "owo" | "Owo" => println!("\nUwU"),
         "UwU" | "uwu" | "Uwu" => println!("\nOwO"),
         _ => println!(
-            "\n\n\n\nCommand not found: \"{}\"\n{}",
-            input, "See the list of available commands: \"c\" | \"commands\""
+            "\n\n\n\nCommand not found: \"{}\"\nSee the list of available commands: \"c\" | \"commands\"",
+            input
         ),
     }
     printf!("\n\n\n\nCommand: ");
@@ -316,7 +316,7 @@ fn input_coords(vec_coords: &mut Vec<u8>) -> InputResult {
     // filters out all chars that are not numbers
     let input: String = input.chars().filter(|c| c.is_digit(10)).collect();
 
-    if input == "" || input == "end" {
+    if input.is_empty() || input == "end" {
         return Ok(OkInput::End);
     }
     if input == "esc" {
@@ -368,7 +368,6 @@ fn error_code(e: Error) {
         Error::InvalidCoordinates => "|=> Error: Invalid Coordinates".to_string(),
     };
 
-    // useful forum:
     for _ in 0..error_to_print.chars().count() {
         printf!("-");
     }
@@ -378,7 +377,7 @@ fn error_code(e: Error) {
     }
 }
 
-fn logic_check(stats: &HashMap<(u8, u8), Tile>, coords: &Vec<u8>, turn: &PlayerTurn) -> bool {
+fn logic_check(stats: &HashMap<(u8, u8), Tile>, coords: &[u8], turn: &PlayerTurn) -> bool {
     let (x1, y1, x2, y2) = (coords[0], coords[1], coords[2], coords[3]);
 
     // checks if input contains invalid coords "0" or "9"
@@ -478,7 +477,7 @@ fn logic_check(stats: &HashMap<(u8, u8), Tile>, coords: &Vec<u8>, turn: &PlayerT
 }
 
 // if fn logic_check is true, execute/implement the action.
-fn logic_move(stats: &mut HashMap<(u8, u8), Tile>, coords: &Vec<u8>) -> bool {
+fn logic_move(stats: &mut HashMap<(u8, u8), Tile>, coords: &[u8]) -> bool {
     let (x1, y1, x2, y2) = (coords[0], coords[1], coords[2], coords[3]);
 
     // first, create a new piece of the same type as the initial in the
@@ -528,11 +527,8 @@ fn check_if_game_over(stats: &HashMap<(u8, u8), Tile>) -> bool {
         }
     }
     // if either remains true, return yes: end game
-    if player1s == true || player2s == true {
-        true
-    } else {
-        false
-    }
+    player1s || player2s
+    // ^^^ minor but neat refactor
 }
 
 // prints the UI/board according to HashMap "stats"
@@ -564,7 +560,7 @@ fn print_board(stats: &HashMap<(u8, u8), Tile>) {
                 }
             }
             // only here to create newline
-            println!("");
+            println!();
         }
         if y == 1 {
             continue;
