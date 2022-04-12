@@ -23,6 +23,7 @@ enum PlayerTurn {
     Player2,
 }
 
+// note: change to InputOK?
 #[derive(Debug, PartialEq)]
 enum OkInput {
     Norm,
@@ -121,8 +122,8 @@ fn main() {
                     PlayerTurn::Player2 => "Player 2",
                 },
                 match vec_coords.len() {
-                    0 => "Enter move coordinates\n\t(e.g. [x, y] : \"12:enter:23\" or \"1223\"): ",
-                    2 => "Input destination coordinates\n\t(e.g. \"23\") (Note: enter \"esc\" to cancel): ",
+                    0 => "Enter move coordinates\n\t(e.g. [x, y] : \"23:enter:34\" or \"2334\"): ",
+                    2 => "Input destination coordinates\n\t(e.g. \"34\") (Note: enter \"esc\" to cancel): ",
                     _ => panic!("OwO whats this? pls fix dis devewopew!"),
                 }
             );
@@ -264,10 +265,10 @@ fn intro_scripts(input: &str) {
             "\tWhen performing a move, you first enter the coordinates of\n",
             "\tthe piece you wish to move; then, the destination coordinates.\n",
             "\tThere are several ways to enter coordinates:\n\n",
-            "\t\t\"12\" :enter: \"23\" :enter:\n",
-            "\t\t\"1223\" :enter:\n\n",
-            "\tBoth of the examples given moves a piece at coordinates (1, 2)\n",
-            "\tto (2, 3).\n\n",
+            "\t\t\"23\" :enter: \"34\" :enter:\n",
+            "\t\t\"2334\" :enter:\n\n",
+            "\tBoth of the examples given moves a piece at coordinates (2, 3)\n",
+            "\tto (3, 4).\n\n",
             "\tSpaces and letters are not read when entering coordinates, so\n",
             "\tyou can even do \"e621 :3\" and this will be read as\n",
             "\t(6, 2) => (1, 3). These are not realistically possible\n",
