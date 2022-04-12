@@ -363,7 +363,7 @@ fn error_code(e: Error) {
         Error::InputSize => "|=> Error: Too many or too little arguments".to_string(),
         Error::InputContainsChar => "|=> Error: Input contains non-numbers".to_string(),
         Error::InvalidNumber => "|=> Error: Invalid numbers".to_string(),
-        Error::InvalidCoordinates => "|=> Error: InvalidCoordinates".to_string(),
+        Error::InvalidCoordinates => "|=> Error: Invalid Coordinates".to_string(),
     };
 
     // useful forum:
@@ -378,7 +378,12 @@ fn error_code(e: Error) {
 
 fn logic_check(stats: &HashMap<(u8, u8), Tile>, coords: &Vec<u8>, turn: &PlayerTurn) -> bool {
     let (x1, y1, x2, y2) = (coords[0], coords[1], coords[2], coords[3]);
-
+    
+    // checks if input contains invalid coords "0" or "9"
+    if coords.contains(&0) || coords.contains(&9) {
+        return false;
+    }
+    
     // checks if the beginning tile contains the current player's piece
     match *turn {
         PlayerTurn::Player1 => match *stats.get(&(x1, y1)).unwrap() {
