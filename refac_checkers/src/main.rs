@@ -174,7 +174,11 @@ fn main() {
         check_if_promote_to_king(&mut stats);
 
         // checks if the game should end.
-        check_if_game_over(&stats);
+        if check_if_game_over(&stats) {
+            clear();
+            println!("Game Over!");
+            break 'outer;
+        }
 
         // if current player did not capture an enemy piece this turn, change.
         if !(is_another_turn) {
