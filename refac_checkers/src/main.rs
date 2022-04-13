@@ -311,10 +311,8 @@ fn intro_scripts(input: &str) {
 }
 
 fn input_coords(vec_coords: &mut Vec<u8>) -> InputResult {
-    // requests user input
-    let input: String = user_input().trim().parse().unwrap();
-    // filters out all chars that are not numbers
-    let input: String = input.chars().filter(|c| c.is_digit(10)).collect();
+    // requests user input, then filters out all chars that are not numbers
+    let input: String = user_input().chars().filter(|c| c.is_digit(10)).collect();
 
     if input.is_empty() || input == "end" {
         return Ok(OkInput::End);
@@ -490,8 +488,7 @@ fn logic_move(stats: &mut HashMap<(u8, u8), Tile>, coords: &[u8]) -> bool {
     match signed(y2) - signed(y1) {
         2 | -2 => {
             Tile::change_tile_state(stats, ((x1 + x2) / 2, (y1 + y2) / 2), &Tile::Emp);
-            // return true if jumps over piece
-            true
+            true // return true if jumps over piece
         }
         // return false if doesn't jump over a piece
         _ => false,
@@ -593,7 +590,7 @@ fn user_input() -> String {
     io::stdin()
         .read_line(&mut ret)
         .expect("OwO what's this? Failed to read line");
-    ret.pop();
+    ret = ret.trim().parse().unwrap();
 
     if ret == "exit" {
         clear();
