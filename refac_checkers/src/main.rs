@@ -87,12 +87,12 @@ fn main() {
     // runs the init menu system
     introduction();
 
-    // HashMap "stats" stores a key of tuple (i8, i8), which represents the
-    // x and y coordinates of a given tile on the checkerboard. For the value
-    // of each respective key, there is an instance of enum "Tile", which
-    // stores information about whether there is a piece on a given tile and
-    // which player it belongs to (the variants are: P1(Single/Double),
-    // P2(Single/Double), Emp).
+    /* HashMap "stats" stores a key of tuple (i8, i8), which represents the
+     * x and y coordinates of a given tile on the checkerboard. For the value
+     * of each respective key, there is an instance of enum "Tile", which
+     * stores information about whether there is a piece on a given tile and
+     * which player it belongs to (the variants are: P1(Single/Double),
+     * P2(Single/Double), Emp). */
     let mut stats: HashMap<(u8, u8), Tile> = HashMap::new();
     Tile::init_fill_hashmap(&mut stats);
 
@@ -323,10 +323,9 @@ fn input_coords(vec_coords: &mut Vec<u8>) -> InputResult {
         return Ok(OkInput::Retype);
     }
 
-    // creates a vec of chars from input. Then, it goes through all the chars
-    // and converts them into int (u32). Then, it is converted to u8, so it
-    // can be added to vec_coords.
-    // can i simplify this into a long string of methods? impl Option ?
+    /* creates a vec of chars from input. Then, it goes through all the chars
+     * and converts them into int (u32). Then, it is converted to u8, so it
+     * can be added to vec_coords. */
     let input_as_chars: Vec<char> = input.chars().collect();
     for v in input_as_chars.iter() {
         match v.to_digit(10) {
@@ -453,10 +452,10 @@ fn logic_check(stats: &HashMap<(u8, u8), Tile>, coords: &[u8], turn: &PlayerTurn
         _ => return false,
     }
 
-    // if "need_to_check_for_capture" is true, then the piece must move two
-    // spaces. Because this is only possible if it jumps over a piece, this
-    // checks whether there is an enemy piece in between the initial and
-    // destination tiles.
+    /* if "need_to_check_for_capture" is true, then the piece must move two
+     * spaces. Because this is only possible if it jumps over a piece, this
+     * checks whether there is an enemy piece in between the initial and
+     * destination tiles. */
     if need_to_check_for_capture {
         match *stats.get(&((x1 + x2) / 2, (y1 + y2) / 2)).unwrap() {
             Tile::Emp => return false,
