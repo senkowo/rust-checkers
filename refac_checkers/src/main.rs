@@ -365,11 +365,11 @@ fn error_code(e: Error) {
         Error::InvalidCoordinates => "|=> Error: Invalid Coordinates".to_string(),
     };
 
-    for _ in 0..=error_to_print.chars().count() {
+    for _ in 0..=error_to_print.len() {
         printf!("-");
     }
     printf!("\n{}\n", error_to_print);
-    for _ in 0..=error_to_print.chars().count() {
+    for _ in 0..=error_to_print.len() {
         printf!("-");
     }
 }
