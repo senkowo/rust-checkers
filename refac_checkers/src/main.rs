@@ -138,7 +138,7 @@ fn main() {
                         is_another_turn = false;
                         continue 'outer;
                     } else {
-                        // if no input and isn't "another_turn" return err(NoInput)
+                        // if no input and another_turn false, return err(NoInput)
                         error_code(Error::NoInput);
                         sleep(2);
                         continue 'outer;
