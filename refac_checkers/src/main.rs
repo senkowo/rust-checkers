@@ -157,8 +157,8 @@ fn main() {
 
         // logic_check returns true if the movement could be performed.
         if logic_check(&stats, &vec_coords, &current_player) {
-            // logic_move returns whether an enemy piece was captured and if the
-            // player should play another turn.
+            // logic_move performs the action and returns whether an enemy piece
+            // was captured, determining if the player should play another turn.
             if logic_move(&mut stats, &vec_coords) {
                 is_another_turn = true;
             } else {
@@ -465,6 +465,7 @@ fn logic_check(stats: &HashMap<(u8, u8), Tile>, coords: &[u8], turn: &PlayerTurn
             }
         }
     }
+
     true // the default output if it survives all the checks
 }
 
@@ -596,5 +597,4 @@ fn user_input() -> String {
 }
 //
 //
-//
-// extra lines to reach 600 lines
+// extra lines to reach 600 lines (consider deleting? in case i need to add instructions?)
