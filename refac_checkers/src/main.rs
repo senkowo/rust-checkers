@@ -1,5 +1,9 @@
 // a beginner project in rust
 
+// instructions for playing the game are shown by entering
+// "h" or "help" in the main menu. Alternatively, refer to the
+// print-statement beginning at line 266. 
+
 use std::collections::HashMap;
 use std::convert::TryInto;
 use std::io::{self, Write};
@@ -589,11 +593,8 @@ fn user_input() -> String {
 
     if ret == "exit" {
         clear();
-        panic!("exit command used, crashed program");
+        panic!("exit command used, crashing program");
     }
 
     ret
 }
-//
-//
-// extra lines to reach 600 lines (consider deleting? in case i need to add instructions?)
