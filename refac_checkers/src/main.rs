@@ -23,9 +23,8 @@ enum PlayerTurn {
     Player2,
 }
 
-// note: change to InputOK?
 #[derive(Debug, PartialEq)]
-enum OkInput {
+enum InputOk {
     Norm,
     End,
     Retype,
@@ -41,7 +40,7 @@ macro_rules! printf {
     }};
 }
 
-type InputResult = Result<OkInput, Error>;
+type InputResult = Result<InputOk, Error>;
 
 const X_LEN: u8 = 8;
 const Y_LEN: u8 = 8;
@@ -131,8 +130,8 @@ fn main() {
             let returned_option_enum = input_coords(&mut vec_coords);
 
             match returned_option_enum {
-                Ok(OkInput::Norm) => (), // leave blank?
-                Ok(OkInput::End) => {
+                Ok(InputOk::Norm) => (), // leave blank?
+                Ok(InputOk::End) => {
                     if is_another_turn {
                         current_player.change();
                         is_another_turn = false;
@@ -144,7 +143,7 @@ fn main() {
                         continue 'outer;
                     }
                 }
-                Ok(OkInput::Retype) => {
+                Ok(InputOk::Retype) => {
                     continue 'outer;
                 }
                 Err(e) => {
@@ -315,10 +314,10 @@ fn input_coords(vec_coords: &mut Vec<u8>) -> InputResult {
     let input: String = user_input().chars().filter(|c| c.is_digit(10)).collect();
 
     if input.is_empty() || input == "end" {
-        return Ok(OkInput::End);
+        return Ok(InputOk::End);
     }
     if input == "esc" {
-        return Ok(OkInput::Retype);
+        return Ok(InputOk::Retype);
     }
 
     /* creates a vec of chars from input. Then, it goes through all the chars
@@ -344,7 +343,7 @@ fn input_coords(vec_coords: &mut Vec<u8>) -> InputResult {
     }
 
     //InputReturn::VecCoords(vec![1])
-    Ok(OkInput::Norm)
+    Ok(InputOk::Norm)
 }
 
 #[derive(Debug, PartialEq)]
