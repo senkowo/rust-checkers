@@ -1,14 +1,8 @@
-// a cli-checkers project in Rust
+// a beginner project in rust
 
 // instructions for playing the game are shown by entering
 // "h" or "help" in the main menu. Alternatively, refer to the
-// print-statement beginning at line 272.
-
-// all of this should be my code, but just in case, I did heavily 
-// reference code from the book "The Rust Programming Language" by
-// Steve Klabnik and Carol Nichols. I also rephrased some code 
-// from the official Rust documentation at 
-// https://www.rust-lang.org/learn
+// print-statement beginning at line 266. 
 
 use std::collections::HashMap;
 use std::convert::TryInto;
