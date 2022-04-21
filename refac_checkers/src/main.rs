@@ -2,12 +2,12 @@
 
 // instructions for playing the game are shown by entering
 // "h" or "help" in the main menu. Alternatively, refer to the
-// print-statement beginning at line 272.
+// print-statement beginning at line 281.
 
-// all of this should be my code, but just in case, I did heavily 
+// all of this should be my code, but just in case, I did heavily
 // reference code from the book "The Rust Programming Language" by
-// Steve Klabnik and Carol Nichols. I also rephrased some code 
-// from the official Rust documentation at 
+// Steve Klabnik and Carol Nichols. I also rephrased some code
+// from the official Rust documentation at
 // https://www.rust-lang.org/learn
 
 use std::collections::HashMap;
@@ -183,10 +183,19 @@ fn main() {
         check_if_promote_to_king(&mut stats);
 
         // checks if the game should end.
-        if check_if_game_over(&stats) {
-            clear();
-            println!("Game Over!");
-            break 'outer;
+        match check_if_game_over(&stats) {
+            Some(p) => {
+                clear();
+                println!(
+                    "Player {} wins!",
+                    match p {
+                        PlayerTurn::Player1 => "1",
+                        PlayerTurn::Player2 => "2",
+                    }
+                );
+                break 'outer;
+            }
+            None => (),
         }
 
         // if current player did not capture an enemy piece this turn, change.
@@ -513,7 +522,7 @@ fn check_if_promote_to_king(stats: &mut HashMap<(u8, u8), Tile>) {
     }
 }
 
-fn check_if_game_over(stats: &HashMap<(u8, u8), Tile>) -> bool {
+fn check_if_game_over(stats: &HashMap<(u8, u8), Tile>) -> Option<PlayerTurn> {
     // goes through every tile on the board and if there are no P1 or P2 pieces,
     // return true to end the game
     let mut player1s = true;
@@ -527,9 +536,14 @@ fn check_if_game_over(stats: &HashMap<(u8, u8), Tile>) -> bool {
             }
         }
     }
-    // if either remains true, return yes: end game
-    player1s || player2s
-    // ^^^ minor but neat refactor
+    // if either remains true, return the player who won the game.
+    if player1s {
+        Some(PlayerTurn::Player1)
+    } else if player2s {
+        Some(PlayerTurn::Player2)
+    } else {
+        None
+    }
 }
 
 // prints the UI/board according to HashMap "stats"
