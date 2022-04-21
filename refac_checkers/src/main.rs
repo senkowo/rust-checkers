@@ -538,9 +538,9 @@ fn check_if_game_over(stats: &HashMap<(u8, u8), Tile>) -> Option<PlayerTurn> {
     }
     // if either remains true, return the player who won the game.
     if player1s {
-        Some(PlayerTurn::Player1)
-    } else if player2s {
         Some(PlayerTurn::Player2)
+    } else if player2s {
+        Some(PlayerTurn::Player1)
     } else {
         None
     }
